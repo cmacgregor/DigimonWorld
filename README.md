@@ -1,2 +1,2 @@
 # DigimonWorld
-Recreating some aspects of Digimon world for learning purposes
+Recreating some aspects of Digimon World for learning purposes
