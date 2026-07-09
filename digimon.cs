@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-public class Digimon : IStats
+public class Digimon : IBattleStats
 {
     public int Id { get; set; }
     public string Name { get; set; }
@@ -53,7 +53,7 @@ public class PartnerDigimon : Digimon, IRaisingStats
     public int CareMistakes { get; set; }
 }
 
-public interface IStats
+public interface IBattleStats
 {
     public DigimonTypeEnum Type { get; set; }
     public ActiveTimeEnum ActiveTime { get; set; }
