@@ -20,7 +20,20 @@ public class Digimon : IBattleStats
     public int Speed { get; set; }
     public int Brains { get; set; }
     public int FinishingMove { get; set; }
-    public List<Tech> TechList { get; set; } = new();
+
+    private readonly List<Tech> _techList = new();
+    public IReadOnlyList<Tech> TechList => _techList;
+
+    public bool AddTech(Tech tech)
+    {
+        if (_techList.Count >= IBattleStats.MaxTechs)
+        {
+            return false;
+        }
+
+        _techList.Add(tech);
+        return true;
+    }
 }
 
 public class PartnerDigimon : Digimon
@@ -56,5 +69,8 @@ public interface IBattleStats
     public int Speed { get; set; }
     public int Brains { get; set; }
     public int FinishingMove { get; set; }
-    public List<Tech> TechList { get; set; }
+
+    public const int MaxTechs = 3;
+    public IReadOnlyList<Tech> TechList { get; }
+    public bool AddTech(Tech tech);
 }
