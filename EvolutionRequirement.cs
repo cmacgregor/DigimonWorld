@@ -19,6 +19,10 @@ public class EvolutionRequirement
 
     public bool IsMetBy(PartnerDigimon partner)
     {
+        // Being the bonus species is a free pass - it never blocks anyone else,
+        // it just lets this one species skip every other condition below.
+        if (SpeciesBonusId.HasValue && partner.SpeciesId == SpeciesBonusId.Value) return true;
+
         if (MinAttack.HasValue && partner.Attack < MinAttack.Value) return false;
         if (MinDefense.HasValue && partner.Defense < MinDefense.Value) return false;
         if (MinSpeed.HasValue && partner.Speed < MinSpeed.Value) return false;
@@ -34,7 +38,6 @@ public class EvolutionRequirement
         if (MaxCareMistakes.HasValue && partner.CareMistakes > MaxCareMistakes.Value) return false;
         if (MinBattlesFought.HasValue && partner.BattlesFought < MinBattlesFought.Value) return false;
         if (MinTechsLearned.HasValue && partner.LearnedTechs.Count < MinTechsLearned.Value) return false;
-        if (SpeciesBonusId.HasValue && partner.SpeciesId != SpeciesBonusId.Value) return false;
 
         return true;
     }
