@@ -17,6 +17,7 @@ public class PartnerDigimon : Digimon
     public int Lifespan { get; set; }
     public int BattlesFought { get; set; }
     public int HoursInCurrentStage { get; set; }
+    public int MinHoursInCurrentStage { get; set; }
 
     public Evolution GetEligibleEvolution()
     {
@@ -30,33 +31,4 @@ public class PartnerDigimon : Digimon
 
         return null;
     }
-
-    public void Evolve(DigimonSpecies newSpecies)
-    {
-        SpeciesId = newSpecies.Id;
-        Name = newSpecies.Name;
-        ModelName = newSpecies.ModelName;
-        AnimationSet = newSpecies.AnimationSet;
-        Type = newSpecies.Type;
-        ActiveTime = newSpecies.ActiveTime;
-        Specialty1 = newSpecies.Specialty1;
-        Specialty2 = newSpecies.Specialty2;
-        FinishingMove = newSpecies.FinishingMove;
-
-        MaxHP = ApplyStatGain(MaxHP, newSpecies.BaseMaxHP);
-        MaxMP = ApplyStatGain(MaxMP, newSpecies.BaseMaxMP);
-        Attack = ApplyStatGain(Attack, newSpecies.BaseAttack);
-        Defense = ApplyStatGain(Defense, newSpecies.BaseDefense);
-        Speed = ApplyStatGain(Speed, newSpecies.BaseSpeed);
-        Brains = ApplyStatGain(Brains, newSpecies.BaseBrains);
-
-        Lifespan += newSpecies.LifespanBonus;
-        HoursInCurrentStage = 0;
-
-        PossibleEvolutions.Clear();
-        PossibleEvolutions.AddRange(newSpecies.PossibleEvolutions);
-    }
-
-    // Placeholder growth formula until the real one is designed.
-    private static int ApplyStatGain(int currentStat, int speciesBaseStat) => currentStat + speciesBaseStat;
 }

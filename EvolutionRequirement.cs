@@ -2,8 +2,6 @@ public class EvolutionRequirement
 {
     public const int RequiredConditionCount = 3;
 
-    public int MinHoursInCurrentStage { get; set; }
-
     public int? MinAttack { get; set; }
     public int? MinDefense { get; set; }
     public int? MinSpeed { get; set; }
@@ -13,20 +11,18 @@ public class EvolutionRequirement
 
     public int? MinWeight { get; set; }
     public int? MaxWeight { get; set; }
-    public int? MinHappiness { get; set; }
-    public int? MinDiscipline { get; set; }
+    public int? HappinessThreshold { get; set; }
+    public int? DisciplineThreshold { get; set; }
+    public int? MinCareMistakes { get; set; }
     public int? MaxCareMistakes { get; set; }
     public int? MinBattlesFought { get; set; }
+    public int? MaxBattlesFought { get; set; }
     public int? MinTechsLearned { get; set; }
     public int? SpeciesBonusId { get; set; }
 
     public bool IsMetBy(PartnerDigimon partner)
     {
-        // Being the bonus species is a free pass - it never blocks anyone else,
-        // it just lets this one species skip every other condition below.
-        if (SpeciesBonusId.HasValue && partner.SpeciesId == SpeciesBonusId.Value) return true;
-
-        if (partner.HoursInCurrentStage < MinHoursInCurrentStage) return false;
+        if (partner.HoursInCurrentStage < partner.MinHoursInCurrentStage) return false;
 
         var satisfiedConditions = 0;
 
@@ -39,11 +35,26 @@ public class EvolutionRequirement
             satisfiedConditions++;
         }
 
-        if (MinHappiness.HasValue && partner.Happiness >= MinHappiness.Value) satisfiedConditions++;
-        if (MinDiscipline.HasValue && partner.Discipline >= MinDiscipline.Value) satisfiedConditions++;
-        if (MaxCareMistakes.HasValue && partner.CareMistakes <= MaxCareMistakes.Value) satisfiedConditions++;
-        if (MinBattlesFought.HasValue && partner.BattlesFought >= MinBattlesFought.Value) satisfiedConditions++;
+        if (HappinessThreshold.HasValue && partner.Happiness >= HappinessThreshold.Value) satisfiedConditions++;
+        if (DisciplineThreshold.HasValue && partner.Discipline >= DisciplineThreshold.Value) satisfiedConditions++;
+
+        if ((MinCareMistakes.HasValue || MaxCareMistakes.HasValue)
+            && (!MinCareMistakes.HasValue || partner.CareMistakes >= MinCareMistakes.Value)
+            && (!MaxCareMistakes.HasValue || partner.CareMistakes <= MaxCareMistakes.Value))
+        {
+            satisfiedConditions++;
+        }
+
+        if ((MinBattlesFought.HasValue || MaxBattlesFought.HasValue)
+            && (!MinBattlesFought.HasValue || partner.BattlesFought >= MinBattlesFought.Value)
+            && (!MaxBattlesFought.HasValue || partner.BattlesFought <= MaxBattlesFought.Value))
+        {
+            satisfiedConditions++;
+        }
+
         if (MinTechsLearned.HasValue && partner.LearnedTechs.Count >= MinTechsLearned.Value) satisfiedConditions++;
+
+        if (SpeciesBonusId.HasValue && partner.SpeciesId == SpeciesBonusId.Value) satisfiedConditions++;
 
         return satisfiedConditions >= RequiredConditionCount;
     }
