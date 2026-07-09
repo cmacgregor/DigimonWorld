@@ -4,9 +4,13 @@ public class EvolutionRequirement
 
     public int MinHoursInCurrentStage { get; set; }
 
-    public int? MinCoreStats { get; set; }
+    public int? MinAttack { get; set; }
+    public int? MinDefense { get; set; }
+    public int? MinSpeed { get; set; }
+    public int? MinBrains { get; set; }
     public int? MinMaxHP { get; set; }
     public int? MinMaxMP { get; set; }
+
     public int? MinWeight { get; set; }
     public int? MaxWeight { get; set; }
     public int? MinHappiness { get; set; }
@@ -26,17 +30,7 @@ public class EvolutionRequirement
 
         var satisfiedConditions = 0;
 
-        if (MinCoreStats.HasValue
-            && partner.Attack >= MinCoreStats.Value
-            && partner.Defense >= MinCoreStats.Value
-            && partner.Speed >= MinCoreStats.Value
-            && partner.Brains >= MinCoreStats.Value)
-        {
-            satisfiedConditions++;
-        }
-
-        if (MinMaxHP.HasValue && partner.MaxHP >= MinMaxHP.Value) satisfiedConditions++;
-        if (MinMaxMP.HasValue && partner.MaxMP >= MinMaxMP.Value) satisfiedConditions++;
+        if (IsStatCheckSatisfied(partner)) satisfiedConditions++;
 
         if ((MinWeight.HasValue || MaxWeight.HasValue)
             && (!MinWeight.HasValue || partner.Weight >= MinWeight.Value)
@@ -52,5 +46,26 @@ public class EvolutionRequirement
         if (MinTechsLearned.HasValue && partner.LearnedTechs.Count >= MinTechsLearned.Value) satisfiedConditions++;
 
         return satisfiedConditions >= RequiredConditionCount;
+    }
+
+    // The stat check is one combined condition, not one per stat - it's
+    // satisfied only if every threshold actually set here is met, whether
+    // that's a single stat or all six.
+    private bool IsStatCheckSatisfied(PartnerDigimon partner)
+    {
+        if (!MinAttack.HasValue && !MinDefense.HasValue && !MinSpeed.HasValue
+            && !MinBrains.HasValue && !MinMaxHP.HasValue && !MinMaxMP.HasValue)
+        {
+            return false;
+        }
+
+        if (MinAttack.HasValue && partner.Attack < MinAttack.Value) return false;
+        if (MinDefense.HasValue && partner.Defense < MinDefense.Value) return false;
+        if (MinSpeed.HasValue && partner.Speed < MinSpeed.Value) return false;
+        if (MinBrains.HasValue && partner.Brains < MinBrains.Value) return false;
+        if (MinMaxHP.HasValue && partner.MaxHP < MinMaxHP.Value) return false;
+        if (MinMaxMP.HasValue && partner.MaxMP < MinMaxMP.Value) return false;
+
+        return true;
     }
 }
