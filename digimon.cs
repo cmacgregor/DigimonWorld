@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 public class Digimon : IBattleStats
 {
     public int Id { get; set; }
@@ -18,7 +20,12 @@ public class Digimon : IBattleStats
     public int Speed { get; set; }
     public int Brains { get; set; }
     public int FinishingMove { get; set; }
-    public TechList TechList { get; } = new();
+
+    private readonly List<Tech> _learnedTechs = new();
+    public IReadOnlyList<Tech> LearnedTechs => _learnedTechs;
+    public void LearnTech(Tech tech) => _learnedTechs.Add(tech);
+
+    public TechList ActiveTechs { get; } = new();
 }
 
 public class PartnerDigimon : Digimon
@@ -54,5 +61,8 @@ public interface IBattleStats
     public int Speed { get; set; }
     public int Brains { get; set; }
     public int FinishingMove { get; set; }
-    public TechList TechList { get; }
+
+    public IReadOnlyList<Tech> LearnedTechs { get; }
+    void LearnTech(Tech tech);
+    public TechList ActiveTechs { get; }
 }
