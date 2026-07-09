@@ -27,5 +27,5 @@ public class Digimon : IBattleStats
 
     public TechList ActiveTechs { get; } = new();
 
-    public List<Evolution> PossibleEvolutions { get; } = new();
+    public List<EvolutionRequirement> PossibleEvolutions { get; } = new();
 }

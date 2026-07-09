@@ -19,13 +19,13 @@ public class PartnerDigimon : Digimon
     public int HoursInCurrentStage { get; set; }
     public int MinHoursInCurrentStage { get; set; }
 
-    public Evolution GetEligibleEvolution()
+    public EvolutionRequirement GetEligibleEvolution()
     {
-        foreach (var evolution in PossibleEvolutions)
+        foreach (var requirement in PossibleEvolutions)
         {
-            if (evolution.Requirement.IsMetBy(this))
+            if (requirement.IsMetBy(this))
             {
-                return evolution;
+                return requirement;
             }
         }
 

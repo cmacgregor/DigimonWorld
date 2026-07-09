@@ -2,6 +2,9 @@ public class EvolutionRequirement
 {
     public const int RequiredConditionCount = 3;
 
+    public int TargetDigimonId { get; set; }
+    public string TargetName { get; set; }
+
     public int? MinAttack { get; set; }
     public int? MinDefense { get; set; }
     public int? MinSpeed { get; set; }
