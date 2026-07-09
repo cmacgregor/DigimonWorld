@@ -21,18 +21,6 @@ public class Digimon : IBattleStats
     public int Brains { get; set; }
     public int FinishingMove { get; set; }
     public List<Tech> TechList { get; set; } = new();
-
-    public Dictionary<string, int> Stats => new()
-    {
-        [nameof(CurrentHP)] = CurrentHP,
-        [nameof(MaxHP)] = MaxHP,
-        [nameof(CurrentMP)] = CurrentMP,
-        [nameof(MaxMP)] = MaxMP,
-        [nameof(Attack)] = Attack,
-        [nameof(Defense)] = Defense,
-        [nameof(Speed)] = Speed,
-        [nameof(Brains)] = Brains,
-    };
 }
 
 public class PartnerDigimon : Digimon, IRaisingStats
@@ -69,7 +57,6 @@ public interface IBattleStats
     public int Brains { get; set; }
     public int FinishingMove { get; set; }
     public List<Tech> TechList { get; set; }
-    public Dictionary<string, int> Stats { get; }
 }
 
 public interface IRaisingStats
