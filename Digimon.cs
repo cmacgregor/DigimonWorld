@@ -26,6 +26,4 @@ public class Digimon : IBattleStats
     public void LearnTech(Tech tech) => _learnedTechs.Add(tech);
 
     public TechList ActiveTechs { get; } = new();
-
-    public List<EvolutionRequirement> PossibleEvolutions { get; } = new();
 }

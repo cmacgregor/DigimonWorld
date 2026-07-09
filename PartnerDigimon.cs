@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 public class PartnerDigimon : Digimon
 {
     public string Nickname { get; set; }
@@ -18,6 +20,8 @@ public class PartnerDigimon : Digimon
     public int BattlesFought { get; set; }
     public int HoursInCurrentStage { get; set; }
     public int MinHoursInCurrentStage { get; set; }
+
+    public List<EvolutionRequirement> PossibleEvolutions { get; } = new();
 
     public EvolutionRequirement GetEligibleEvolution()
     {
