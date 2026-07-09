@@ -22,6 +22,16 @@ public enum ActiveTimeEnum
     None,
     Morning,
     Day,
-    Dusk, 
-    Night, 
+    Dusk,
+    Night,
+}
+
+public enum StatusEffectEnum
+{
+    None,
+    Poison,
+    Confusion,
+    Sleep,
+    Paralysis,
+    Freeze,
 }

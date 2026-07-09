@@ -23,7 +23,7 @@ public class Digimon : IBattleStats
     public List<Tech> TechList { get; set; } = new();
 }
 
-public class PartnerDigimon : Digimon, IRaisingStats
+public class PartnerDigimon : Digimon
 {
     public string Nickname { get; set; }
     public int Happiness { get; set; }
@@ -57,22 +57,4 @@ public interface IBattleStats
     public int Brains { get; set; }
     public int FinishingMove { get; set; }
     public List<Tech> TechList { get; set; }
-}
-
-public interface IRaisingStats
-{
-    public string Nickname { get; set; }
-    public int Happiness { get; set; }
-    public int Discipline { get; set; }
-    public int Virus { get; set; }
-    public int Lives { get; set; }
-    public int Age { get; set; }
-    public int Weight { get; set; }
-    public bool Hungry { get; set; }
-    public bool Potty { get; set; }
-    public bool Injured { get; set; }
-    public bool Sleepy { get; set; }
-    public bool Overworked { get; set; }
-    public bool Sick { get; set; }
-    public int CareMistakes { get; set; }
 }

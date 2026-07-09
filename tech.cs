@@ -7,4 +7,6 @@ public class Tech
     public DigimonTypeEnum Type { get; set; }
     public int MpCost { get; set; }
     public int Power { get; set; }
+    public StatusEffectEnum StatusEffect { get; set; }
+    public int StatusEffectChancePercent { get; set; }
 }
