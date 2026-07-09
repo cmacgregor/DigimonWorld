@@ -14,4 +14,17 @@ public class PartnerDigimon : Digimon
     public bool Overworked { get; set; }
     public bool Sick { get; set; }
     public int CareMistakes { get; set; }
+
+    public Evolution GetEligibleEvolution()
+    {
+        foreach (var evolution in PossibleEvolutions)
+        {
+            if (evolution.Requirement.IsMetBy(this))
+            {
+                return evolution;
+            }
+        }
+
+        return null;
+    }
 }
