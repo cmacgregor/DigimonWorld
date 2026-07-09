@@ -16,6 +16,7 @@ public class PartnerDigimon : Digimon
     public int CareMistakes { get; set; }
     public int Lifespan { get; set; }
     public int BattlesFought { get; set; }
+    public int HoursInCurrentStage { get; set; }
 
     public Evolution GetEligibleEvolution()
     {
@@ -50,6 +51,7 @@ public class PartnerDigimon : Digimon
         Brains = ApplyStatGain(Brains, newSpecies.BaseBrains);
 
         Lifespan += newSpecies.LifespanBonus;
+        HoursInCurrentStage = 0;
 
         PossibleEvolutions.Clear();
         PossibleEvolutions.AddRange(newSpecies.PossibleEvolutions);
