@@ -13,6 +13,8 @@ public class EvolutionRequirement
     public int? MinHappiness { get; set; }
     public int? MinDiscipline { get; set; }
     public int? MaxCareMistakes { get; set; }
+    public int? MinBattlesFought { get; set; }
+    public int? MinTechsLearned { get; set; }
 
     public bool IsMetBy(PartnerDigimon partner)
     {
@@ -29,6 +31,8 @@ public class EvolutionRequirement
         if (MinHappiness.HasValue && partner.Happiness < MinHappiness.Value) return false;
         if (MinDiscipline.HasValue && partner.Discipline < MinDiscipline.Value) return false;
         if (MaxCareMistakes.HasValue && partner.CareMistakes > MaxCareMistakes.Value) return false;
+        if (MinBattlesFought.HasValue && partner.BattlesFought < MinBattlesFought.Value) return false;
+        if (MinTechsLearned.HasValue && partner.LearnedTechs.Count < MinTechsLearned.Value) return false;
 
         return true;
     }

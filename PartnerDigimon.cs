@@ -15,6 +15,7 @@ public class PartnerDigimon : Digimon
     public bool Sick { get; set; }
     public int CareMistakes { get; set; }
     public int Lifespan { get; set; }
+    public int BattlesFought { get; set; }
 
     public Evolution GetEligibleEvolution()
     {
