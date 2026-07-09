@@ -29,9 +29,8 @@ public enum ActiveTimeEnum
 public enum StatusEffectEnum
 {
     None,
+    Confuse,
+    Flat,
     Poison,
-    Confusion,
-    Sleep,
-    Paralysis,
-    Freeze,
+    Stun,
 }
