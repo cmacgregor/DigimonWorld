@@ -15,6 +15,7 @@ public class EvolutionRequirement
     public int? MaxCareMistakes { get; set; }
     public int? MinBattlesFought { get; set; }
     public int? MinTechsLearned { get; set; }
+    public int? RequiredSpeciesId { get; set; }
 
     public bool IsMetBy(PartnerDigimon partner)
     {
@@ -33,6 +34,7 @@ public class EvolutionRequirement
         if (MaxCareMistakes.HasValue && partner.CareMistakes > MaxCareMistakes.Value) return false;
         if (MinBattlesFought.HasValue && partner.BattlesFought < MinBattlesFought.Value) return false;
         if (MinTechsLearned.HasValue && partner.LearnedTechs.Count < MinTechsLearned.Value) return false;
+        if (RequiredSpeciesId.HasValue && partner.SpeciesId != RequiredSpeciesId.Value) return false;
 
         return true;
     }
