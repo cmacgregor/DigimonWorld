@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 public class Digimon : IBattleStats
 {
-    public int Id { get; set; }
+    public int SpeciesId { get; set; }
     public string Name { get; set; }
     public string ModelName { get; set; }
     public string AnimationSet { get; set; }
