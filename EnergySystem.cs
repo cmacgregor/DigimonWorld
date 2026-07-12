@@ -2,11 +2,13 @@ using System;
 
 // Energy is separate from Hunger - it's a second countdown that only
 // starts draining once Hungry, and once it bottoms out, starvation
-// weight loss kicks in. Task/battle/training-driven drain isn't modeled
-// yet, same as the stat-gain formulas those would feed.
+// weight loss kicks in.
+// TODO: Task/battle/training-driven drain isn't modeled yet, same as the
+// stat-gain formulas those would feed.
 public class EnergySystem
 {
-    public const int GaugeMax = 240; // placeholder
+    // TODO: Placeholder value - replace once the real Energy cap is decided.
+    public const int GaugeMax = 240;
     public const int StarvationWeightLossIntervalMinutes = 10;
     public const int StarvationWeightLossGrams = 1;
     public const int SleepStarvationWeightLossGramsPerHour = 1;

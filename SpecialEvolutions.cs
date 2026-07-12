@@ -58,10 +58,11 @@ public static class SpecialEvolutions
         partner.ApplySpeciesChange(nanimonData, resetStageTimer: false);
     }
 
-    // Any In-Training, sleeps in a particular area. Real location/world
-    // state isn't designed yet - LocationEnum.PlaceholderArea stands in
-    // for "the area" until that exists. Sleep event and the 50% roll
-    // stay external.
+    // Any In-Training, sleeps in a particular area. Sleep event and the
+    // 50% roll stay external.
+    // TODO: Real location/world state isn't designed yet -
+    // LocationEnum.PlaceholderArea stands in for "the area" until that
+    // exists; replace this check with the real area once it does.
     public static bool CanEvolveToKunemon(PartnerDigimon partner)
     {
         return partner.Level == DigimonLevelEnum.InTraining && partner.CurrentLocation == LocationEnum.PlaceholderArea;

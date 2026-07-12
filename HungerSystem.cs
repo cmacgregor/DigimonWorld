@@ -3,16 +3,18 @@
 // the reset threshold, it incurs a care mistake.
 public class HungerSystem
 {
-    public const int GaugeMax = 480; // placeholder: ~8h before Hungry
+    // TODO: Placeholder value - replace once the real time-to-Hungry is decided.
+    public const int GaugeMax = 480; // ~8h before Hungry
     public const int NeglectCareMistakeMinutes = 90; // 1.5h past Hungry
     public const int NeglectCareMistakesWhileTraining = 2;
-    public const int GaugeResetValueAfterNeglect = 100; // placeholder
+    // TODO: Placeholder value - replace once the real post-neglect reset value is decided.
+    public const int GaugeResetValueAfterNeglect = 100;
 
     public int Gauge { get; set; }
     // Set once the first time Gauge crosses the neglect threshold, so the
-    // care mistake fires once per hungry episode, not every tick. Feeding
-    // (not built yet) is expected to reset this back to false along with
-    // Gauge.
+    // care mistake fires once per hungry episode, not every tick.
+    // TODO: Feeding isn't built yet - it's expected to reset this back to
+    // false along with Gauge.
     public bool CareMistakeApplied { get; set; }
 
     public bool Hungry => Gauge <= 0;

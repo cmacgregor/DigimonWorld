@@ -52,8 +52,9 @@ public enum TirednessEnum
     Overworked,
 }
 
-// Placeholder until real location/world state is designed - just enough
-// to represent "which area is the Digimon currently in."
+// TODO: Placeholder until real location/world state is designed - just
+// enough to represent "which area is the Digimon currently in." Replace
+// PlaceholderArea with the real set of areas once that system exists.
 public enum LocationEnum
 {
     None,
