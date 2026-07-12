@@ -40,8 +40,6 @@ public class PartnerDigimon : Digimon
 
     public void Evolve(DigimonEvolutionData newSpeciesData)
     {
-        SpeciesId = newSpeciesData.SpeciesId;
-
         Attack += DigimonEvolutionData.CalculateStatGain(Attack, newSpeciesData.ReferenceAttack);
         Defense += DigimonEvolutionData.CalculateStatGain(Defense, newSpeciesData.ReferenceDefense);
         Speed += DigimonEvolutionData.CalculateStatGain(Speed, newSpeciesData.ReferenceSpeed);
@@ -50,6 +48,47 @@ public class PartnerDigimon : Digimon
         MaxMP += DigimonEvolutionData.CalculateStatGain(MaxMP, newSpeciesData.ReferenceMaxMP);
 
         Lifespan += LifespanGainOnEvolve;
+        ApplySpeciesChange(newSpeciesData);
+    }
+
+    // Triggered externally when the poop gauge is full - halves every stat
+    // instead of applying the normal reference-stat gain formula.
+    public void EvolveToSukamon(DigimonEvolutionData sukamonData)
+    {
+        ApplyStatPenaltyPercent(50);
+        ApplySpeciesChange(sukamonData);
+    }
+
+    // Triggered externally when a rookie hits its time gate without meeting
+    // any evolution's requirements - a 20% stat penalty instead of a gain.
+    public void EvolveToNumemon(DigimonEvolutionData numemonData)
+    {
+        ApplyStatPenaltyPercent(20);
+        ApplySpeciesChange(numemonData);
+    }
+
+    // Item-triggered evolution to a specific target - no stat gain, no
+    // lifespan gain, just the species change.
+    public void EvolveWithItem(DigimonEvolutionData targetSpeciesData)
+    {
+        ApplySpeciesChange(targetSpeciesData);
+    }
+
+    private void ApplyStatPenaltyPercent(int percentLost)
+    {
+        Attack = ApplyPercent(Attack, percentLost);
+        Defense = ApplyPercent(Defense, percentLost);
+        Speed = ApplyPercent(Speed, percentLost);
+        Brains = ApplyPercent(Brains, percentLost);
+        MaxHP = ApplyPercent(MaxHP, percentLost);
+        MaxMP = ApplyPercent(MaxMP, percentLost);
+    }
+
+    private static int ApplyPercent(int currentStat, int percentLost) => currentStat * (100 - percentLost) / 100;
+
+    private void ApplySpeciesChange(DigimonEvolutionData newSpeciesData)
+    {
+        SpeciesId = newSpeciesData.SpeciesId;
         HoursInCurrentStage = 0;
 
         PossibleEvolutions.Clear();

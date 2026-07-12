@@ -73,4 +73,61 @@ public class DigimonEvolutionDataTests
 
         Assert.Equal(200 + PartnerDigimon.LifespanGainOnEvolve, partner.Lifespan);
     }
+
+    [Fact]
+    public void EvolveToSukamon_HalvesEveryStatAndGrantsNoLifespan()
+    {
+        var partner = new PartnerDigimon
+        {
+            Attack = 100,
+            Defense = 51,
+            Lifespan = 200,
+        };
+
+        partner.EvolveToSukamon(new DigimonEvolutionData { SpeciesId = 999 });
+
+        Assert.Equal(999, partner.SpeciesId);
+        Assert.Equal(50, partner.Attack);
+        Assert.Equal(25, partner.Defense); // 51 * 50 / 100, truncated
+        Assert.Equal(200, partner.Lifespan); // unchanged - no lifespan gain
+    }
+
+    [Fact]
+    public void EvolveToNumemon_ReducesEveryStatByTwentyPercentAndGrantsNoLifespan()
+    {
+        var partner = new PartnerDigimon
+        {
+            Attack = 100,
+            Lifespan = 200,
+        };
+
+        partner.EvolveToNumemon(new DigimonEvolutionData { SpeciesId = 998 });
+
+        Assert.Equal(998, partner.SpeciesId);
+        Assert.Equal(80, partner.Attack);
+        Assert.Equal(200, partner.Lifespan); // unchanged - no lifespan gain
+    }
+
+    [Fact]
+    public void EvolveWithItem_ChangesSpeciesWithNoStatOrLifespanChange()
+    {
+        var partner = new PartnerDigimon
+        {
+            Attack = 100,
+            Defense = 100,
+            Lifespan = 200,
+        };
+
+        partner.EvolveWithItem(new DigimonEvolutionData
+        {
+            SpeciesId = 4,
+            ReferenceAttack = 999,
+            ReferenceDefense = 999,
+        });
+
+        Assert.Equal(4, partner.SpeciesId);
+        Assert.Equal(100, partner.Attack);
+        Assert.Equal(100, partner.Defense);
+        Assert.Equal(200, partner.Lifespan);
+    }
 }
