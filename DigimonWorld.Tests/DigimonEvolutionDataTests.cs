@@ -124,6 +124,55 @@ public class DigimonEvolutionDataTests
     }
 
     [Fact]
+    public void CanEvolveToNanimon_RequiresRookieLevelAndZeroHappinessAndDiscipline()
+    {
+        var eligible = new PartnerDigimon
+        {
+            Level = DigimonLevelEnum.Rookie,
+            Happiness = 0,
+            Discipline = 0,
+        };
+        var wrongLevel = new PartnerDigimon
+        {
+            Level = DigimonLevelEnum.Champion,
+            Happiness = 0,
+            Discipline = 0,
+        };
+        var happinessNotZero = new PartnerDigimon
+        {
+            Level = DigimonLevelEnum.Rookie,
+            Happiness = 1,
+            Discipline = 0,
+        };
+
+        Assert.True(eligible.CanEvolveToNanimon());
+        Assert.False(wrongLevel.CanEvolveToNanimon());
+        Assert.False(happinessNotZero.CanEvolveToNanimon());
+    }
+
+    [Fact]
+    public void EvolveToNanimon_ChangesSpeciesWithNoStatChangeButGrantsLifespan_AndKeepsStageTimer()
+    {
+        var partner = new PartnerDigimon
+        {
+            Attack = 100,
+            Lifespan = 200,
+            HoursInCurrentStage = 50,
+        };
+
+        partner.EvolveToNanimon(new DigimonEvolutionData
+        {
+            SpeciesId = 997,
+            ReferenceAttack = 999,
+        });
+
+        Assert.Equal(997, partner.SpeciesId);
+        Assert.Equal(100, partner.Attack); // unchanged
+        Assert.Equal(200 + PartnerDigimon.LifespanGainOnEvolve, partner.Lifespan);
+        Assert.Equal(50, partner.HoursInCurrentStage); // same-level - timer not reset
+    }
+
+    [Fact]
     public void EvolveWithItem_ChangesSpeciesWithNoStatOrLifespanChange_WhenTargetIsInPossibleEvolutions()
     {
         var partner = new PartnerDigimon

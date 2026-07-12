@@ -73,6 +73,21 @@ public class PartnerDigimon : Digimon
         ApplySpeciesChange(numemonData);
     }
 
+    // Any Rookie, scolded while Happiness and Discipline are both 0.
+    public bool CanEvolveToNanimon()
+    {
+        return Level == DigimonLevelEnum.Rookie && Happiness == 0 && Discipline == 0;
+    }
+
+    // No stat change at all, but still grants the normal lifespan bonus.
+    // Same level as the Rookie it came from, so the stage timer doesn't
+    // reset (only care mistakes/battle count do, like any evolution).
+    public void EvolveToNanimon(DigimonEvolutionData nanimonData)
+    {
+        Lifespan += LifespanGainOnEvolve;
+        ApplySpeciesChange(nanimonData, resetStageTimer: false);
+    }
+
     // Item-triggered evolution to a specific target. Still restricted to
     // this Mon's own PossibleEvolutions subset - an item can't send it
     // anywhere outside that. The only path with no stat or lifespan gain.
