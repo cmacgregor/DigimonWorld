@@ -35,4 +35,21 @@ public class PartnerDigimon : Digimon
 
         return null;
     }
+
+    public void Evolve(DigimonEvolutionData newSpeciesData)
+    {
+        SpeciesId = newSpeciesData.SpeciesId;
+
+        Attack += DigimonEvolutionData.CalculateStatGain(Attack, newSpeciesData.ReferenceAttack);
+        Defense += DigimonEvolutionData.CalculateStatGain(Defense, newSpeciesData.ReferenceDefense);
+        Speed += DigimonEvolutionData.CalculateStatGain(Speed, newSpeciesData.ReferenceSpeed);
+        Brains += DigimonEvolutionData.CalculateStatGain(Brains, newSpeciesData.ReferenceBrains);
+        MaxHP += DigimonEvolutionData.CalculateStatGain(MaxHP, newSpeciesData.ReferenceMaxHP);
+        MaxMP += DigimonEvolutionData.CalculateStatGain(MaxMP, newSpeciesData.ReferenceMaxMP);
+
+        HoursInCurrentStage = 0;
+
+        PossibleEvolutions.Clear();
+        PossibleEvolutions.AddRange(newSpeciesData.PossibleEvolutions);
+    }
 }
