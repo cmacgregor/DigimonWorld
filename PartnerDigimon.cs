@@ -12,6 +12,9 @@ public class PartnerDigimon : Digimon
     public const int NinjamonRequiredBattlesFought = 50;
     public const int MonochromonChancePercent = 30;
     public const int MonochromonRequiredDefense = 500;
+    public const int VademonPraiseOrScoldChancePercent = 50;
+    public const int VademonPraiseOrScoldRequiredHoursInCurrentStage = 240;
+    public const int VademonTimeoutRequiredHoursInCurrentStage = 360;
 
     public ActiveTimeEnum ActiveTime { get; set; }
     public string Nickname { get; set; }
@@ -154,6 +157,24 @@ public class PartnerDigimon : Digimon
         return SpeciesId == drimogemonSpeciesId
             && Discipline == 100
             && Defense >= MonochromonRequiredDefense;
+    }
+
+    // Any Champion, praised or scolded while the evolution counter is at
+    // least 240h. Praise/scold event and the 50% roll stay external.
+    public bool CanEvolveToVademonFromPraiseOrScold()
+    {
+        return Level == DigimonLevelEnum.Champion
+            && HoursInCurrentStage >= VademonPraiseOrScoldRequiredHoursInCurrentStage;
+    }
+
+    // Any Champion that reaches a 360h evolution counter without meeting
+    // any evolution to another Ultimate - deterministic, no roll needed
+    // (same failure-fallback shape as Numemon, just at Champion level).
+    public bool CanEvolveToVademonFromTimeout()
+    {
+        return Level == DigimonLevelEnum.Champion
+            && HoursInCurrentStage >= VademonTimeoutRequiredHoursInCurrentStage
+            && GetEligibleEvolution() == null;
     }
 
     // Item-triggered evolution to a specific target. Still restricted to

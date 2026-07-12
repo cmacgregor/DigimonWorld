@@ -282,6 +282,43 @@ public class DigimonEvolutionDataTests
     }
 
     [Fact]
+    public void CanEvolveToVademonFromPraiseOrScold_RequiresChampionAtOrPast240Hours()
+    {
+        var eligible = new PartnerDigimon { Level = DigimonLevelEnum.Champion, HoursInCurrentStage = 240 };
+        var pastThreshold = new PartnerDigimon { Level = DigimonLevelEnum.Champion, HoursInCurrentStage = 300 };
+        var tooEarly = new PartnerDigimon { Level = DigimonLevelEnum.Champion, HoursInCurrentStage = 239 };
+        var wrongLevel = new PartnerDigimon { Level = DigimonLevelEnum.Rookie, HoursInCurrentStage = 240 };
+
+        Assert.True(eligible.CanEvolveToVademonFromPraiseOrScold());
+        Assert.True(pastThreshold.CanEvolveToVademonFromPraiseOrScold());
+        Assert.False(tooEarly.CanEvolveToVademonFromPraiseOrScold());
+        Assert.False(wrongLevel.CanEvolveToVademonFromPraiseOrScold());
+    }
+
+    [Fact]
+    public void CanEvolveToVademonFromTimeout_RequiresChampionAt360HoursWithNoEligibleEvolution()
+    {
+        var eligibleWithNoOptions = new PartnerDigimon { Level = DigimonLevelEnum.Champion, HoursInCurrentStage = 360 };
+
+        var hasAnEligibleEvolution = new PartnerDigimon { Level = DigimonLevelEnum.Champion, HoursInCurrentStage = 360 };
+        hasAnEligibleEvolution.PossibleEvolutions.Add(new EvolutionRequirement
+        {
+            TargetName = "SomeUltimate",
+            HappinessThreshold = 0,
+            DisciplineThreshold = 0,
+            MaxCareMistakes = 0,
+        });
+
+        var tooEarly = new PartnerDigimon { Level = DigimonLevelEnum.Champion, HoursInCurrentStage = 359 };
+        var wrongLevel = new PartnerDigimon { Level = DigimonLevelEnum.Rookie, HoursInCurrentStage = 360 };
+
+        Assert.True(eligibleWithNoOptions.CanEvolveToVademonFromTimeout());
+        Assert.False(hasAnEligibleEvolution.CanEvolveToVademonFromTimeout());
+        Assert.False(tooEarly.CanEvolveToVademonFromTimeout());
+        Assert.False(wrongLevel.CanEvolveToVademonFromTimeout());
+    }
+
+    [Fact]
     public void EvolveWithItem_ChangesSpeciesWithNoStatOrLifespanChange_WhenTargetIsInPossibleEvolutions()
     {
         var partner = new PartnerDigimon
