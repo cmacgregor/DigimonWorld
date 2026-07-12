@@ -2,6 +2,8 @@ using System.Collections.Generic;
 
 public class PartnerDigimon : Digimon
 {
+    public const int LifespanGainOnEvolve = 96;
+
     public string Nickname { get; set; }
     public int Happiness { get; set; }
     public int Discipline { get; set; }
@@ -47,6 +49,7 @@ public class PartnerDigimon : Digimon
         MaxHP += DigimonEvolutionData.CalculateStatGain(MaxHP, newSpeciesData.ReferenceMaxHP);
         MaxMP += DigimonEvolutionData.CalculateStatGain(MaxMP, newSpeciesData.ReferenceMaxMP);
 
+        Lifespan += LifespanGainOnEvolve;
         HoursInCurrentStage = 0;
 
         PossibleEvolutions.Clear();

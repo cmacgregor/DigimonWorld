@@ -63,4 +63,14 @@ public class DigimonEvolutionDataTests
         Assert.Single(partner.PossibleEvolutions);
         Assert.Same(newRequirement, partner.PossibleEvolutions[0]);
     }
+
+    [Fact]
+    public void Evolve_AlwaysGrantsAFlatLifespanBonus()
+    {
+        var partner = new PartnerDigimon { Lifespan = 200 };
+
+        partner.Evolve(new DigimonEvolutionData());
+
+        Assert.Equal(200 + PartnerDigimon.LifespanGainOnEvolve, partner.Lifespan);
+    }
 }
