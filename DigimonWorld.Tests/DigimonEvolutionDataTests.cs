@@ -65,6 +65,21 @@ public class DigimonEvolutionDataTests
     }
 
     [Fact]
+    public void Evolve_ResetsCareMistakesAndBattlesFought()
+    {
+        var partner = new PartnerDigimon
+        {
+            CareMistakes = 5,
+            BattlesFought = 42,
+        };
+
+        partner.Evolve(new DigimonEvolutionData());
+
+        Assert.Equal(0, partner.CareMistakes);
+        Assert.Equal(0, partner.BattlesFought);
+    }
+
+    [Fact]
     public void Evolve_AlwaysGrantsAFlatLifespanBonus()
     {
         var partner = new PartnerDigimon { Lifespan = 200 };

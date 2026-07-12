@@ -109,11 +109,20 @@ public class PartnerDigimon : Digimon
 
     private static int ApplyPercent(int currentStat, int percentLost) => currentStat * (100 - percentLost) / 100;
 
-    private void ApplySpeciesChange(DigimonEvolutionData newSpeciesData)
+    // resetStageTimer is false for same-level special evolutions (Kunemon,
+    // Bakemon, etc.) - those don't reset progress toward the next real
+    // level, but care mistakes and battle count reset like any evolution.
+    private void ApplySpeciesChange(DigimonEvolutionData newSpeciesData, bool resetStageTimer = true)
     {
         SpeciesId = newSpeciesData.SpeciesId;
         Level = newSpeciesData.Level;
-        HoursInCurrentStage = 0;
+        CareMistakes = 0;
+        BattlesFought = 0;
+
+        if (resetStageTimer)
+        {
+            HoursInCurrentStage = 0;
+        }
 
         PossibleEvolutions.Clear();
         PossibleEvolutions.AddRange(newSpeciesData.PossibleEvolutions);
