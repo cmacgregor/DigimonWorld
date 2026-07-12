@@ -16,10 +16,12 @@ public class PartnerDigimon : Digimon
     public int Age { get; set; }
     public int Weight { get; set; }
     public bool Hungry { get; set; }
+    public int HungerGauge { get; set; }
     public bool NeedsToPotty { get; set; }
     public int PottyGauge { get; set; }
     public bool Injured { get; set; }
     public bool Sleepy { get; set; }
+    public int SleepGauge { get; set; }
     public int TirednessGauge { get; set; }
     public bool Sick { get; set; }
     public int CareMistakes { get; set; }
@@ -40,6 +42,18 @@ public class PartnerDigimon : Digimon
             if (TirednessGauge >= TiredThreshold) return TirednessEnum.Tired;
             return TirednessEnum.Rested;
         }
+    }
+
+    // Called by the world clock as it advances. Rate is a 1:1 placeholder
+    // (1 gauge point per hour) until real pacing is designed - adjust
+    // here once that's settled. Hungry/Sleepy/NeedsToPotty aren't flipped
+    // here; that threshold decision stays external, same as PottyGauge's
+    // "full" condition already does.
+    public void AdvanceTime(int hours)
+    {
+        HoursInCurrentStage += hours;
+        HungerGauge += hours;
+        SleepGauge += hours;
     }
 
     public EvolutionRequirement GetEligibleEvolution()

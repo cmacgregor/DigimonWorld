@@ -83,4 +83,21 @@ public class PartnerDigimonTests
 
         Assert.Null(partner.GetEligibleEvolution());
     }
+
+    [Fact]
+    public void AdvanceTime_IncrementsStageTimerAndHungerAndSleepGauges()
+    {
+        var partner = new PartnerDigimon
+        {
+            HoursInCurrentStage = 10,
+            HungerGauge = 5,
+            SleepGauge = 2,
+        };
+
+        partner.AdvanceTime(3);
+
+        Assert.Equal(13, partner.HoursInCurrentStage);
+        Assert.Equal(8, partner.HungerGauge);
+        Assert.Equal(5, partner.SleepGauge);
+    }
 }
