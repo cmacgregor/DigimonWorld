@@ -65,18 +65,20 @@ public class DigimonEvolutionDataTests
     }
 
     [Fact]
-    public void Evolve_ResetsCareMistakesAndBattlesFought()
+    public void Evolve_ResetsCareMistakesAndBattlesFoughtAndWon()
     {
         var partner = new PartnerDigimon
         {
             CareMistakes = 5,
             BattlesFought = 42,
+            BattlesWon = 30,
         };
 
         partner.Evolve(new DigimonEvolutionData());
 
         Assert.Equal(0, partner.CareMistakes);
         Assert.Equal(0, partner.BattlesFought);
+        Assert.Equal(0, partner.BattlesWon);
     }
 
     [Fact]
@@ -250,14 +252,14 @@ public class DigimonEvolutionDataTests
     }
 
     [Fact]
-    public void CanEvolveToNinjamon_RequiresVegimonFullDisciplineAndOver50Battles()
+    public void CanEvolveToNinjamon_RequiresVegimonFullDisciplineAndOver50BattlesWon()
     {
         const int vegimonId = 30;
 
-        var eligible = new PartnerDigimon { SpeciesId = vegimonId, Discipline = 100, BattlesFought = 51 };
-        var notEnoughBattles = new PartnerDigimon { SpeciesId = vegimonId, Discipline = 100, BattlesFought = 50 };
-        var disciplineNotFull = new PartnerDigimon { SpeciesId = vegimonId, Discipline = 99, BattlesFought = 51 };
-        var wrongSpecies = new PartnerDigimon { SpeciesId = 7, Discipline = 100, BattlesFought = 51 };
+        var eligible = new PartnerDigimon { SpeciesId = vegimonId, Discipline = 100, BattlesWon = 51 };
+        var notEnoughBattles = new PartnerDigimon { SpeciesId = vegimonId, Discipline = 100, BattlesWon = 50 };
+        var disciplineNotFull = new PartnerDigimon { SpeciesId = vegimonId, Discipline = 99, BattlesWon = 51 };
+        var wrongSpecies = new PartnerDigimon { SpeciesId = 7, Discipline = 100, BattlesWon = 51 };
 
         Assert.True(eligible.CanEvolveToNinjamon(vegimonId));
         Assert.False(notEnoughBattles.CanEvolveToNinjamon(vegimonId));

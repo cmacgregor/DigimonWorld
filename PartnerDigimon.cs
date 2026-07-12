@@ -9,7 +9,7 @@ public class PartnerDigimon : Digimon
     public const int CoelamonChancePercent = 30;
     public const int CoelamonRequiredHoursInCurrentStage = 200;
     public const int NinjamonChancePercent = 30;
-    public const int NinjamonRequiredBattlesFought = 50;
+    public const int NinjamonRequiredBattlesWon = 50;
     public const int MonochromonChancePercent = 30;
     public const int MonochromonRequiredDefense = 500;
     public const int VademonPraiseOrScoldChancePercent = 50;
@@ -36,6 +36,7 @@ public class PartnerDigimon : Digimon
     public int CareMistakes { get; set; }
     public int Lifespan { get; set; }
     public int BattlesFought { get; set; }
+    public int BattlesWon { get; set; }
     public int HoursInCurrentStage { get; set; }
     public int MinHoursInCurrentStage { get; set; }
 
@@ -142,14 +143,12 @@ public class PartnerDigimon : Digimon
     }
 
     // Vegimon specifically, sleeps with Discipline 100 and more than 50
-    // battles fought (the list says "battles won" - using BattlesFought as
-    // the closest tracked stat since there's no separate win counter).
-    // Sleep event and the 30% roll stay external.
+    // battles won. Sleep event and the 30% roll stay external.
     public bool CanEvolveToNinjamon(int vegimonSpeciesId)
     {
         return SpeciesId == vegimonSpeciesId
             && Discipline == 100
-            && BattlesFought > NinjamonRequiredBattlesFought;
+            && BattlesWon > NinjamonRequiredBattlesWon;
     }
 
     // Drimogemon specifically, sleeps with Discipline 100 and Defense of
@@ -238,6 +237,7 @@ public class PartnerDigimon : Digimon
         Level = newSpeciesData.Level;
         CareMistakes = 0;
         BattlesFought = 0;
+        BattlesWon = 0;
 
         if (resetStageTimer)
         {
