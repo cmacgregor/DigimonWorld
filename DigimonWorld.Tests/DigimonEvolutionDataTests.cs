@@ -190,6 +190,18 @@ public class DigimonEvolutionDataTests
     }
 
     [Fact]
+    public void CanEvolveToKunemon_RequiresInTrainingInThePlaceholderArea()
+    {
+        var eligible = new PartnerDigimon { Level = DigimonLevelEnum.InTraining, CurrentLocation = LocationEnum.PlaceholderArea };
+        var wrongLevel = new PartnerDigimon { Level = DigimonLevelEnum.Rookie, CurrentLocation = LocationEnum.PlaceholderArea };
+        var wrongLocation = new PartnerDigimon { Level = DigimonLevelEnum.InTraining, CurrentLocation = LocationEnum.None };
+
+        Assert.True(eligible.CanEvolveToKunemon());
+        Assert.False(wrongLevel.CanEvolveToKunemon());
+        Assert.False(wrongLocation.CanEvolveToKunemon());
+    }
+
+    [Fact]
     public void CanEvolveToBakemon_ExcludesPenguinmonButAllowsOtherRookies()
     {
         const int penguinmonId = 42;

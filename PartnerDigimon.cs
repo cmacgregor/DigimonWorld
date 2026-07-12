@@ -17,6 +17,7 @@ public class PartnerDigimon : Digimon
     public const int VademonTimeoutRequiredHoursInCurrentStage = 360;
     public const int PhoenixmonChancePercent = 10;
     public const int SkullgreymonChancePercent = 10;
+    public const int KunemonChancePercent = 50;
     public const int TirednessGaugeMax = 100;
     public const int TiredThreshold = 80;
     public const int OverworkedThreshold = 100;
@@ -42,6 +43,7 @@ public class PartnerDigimon : Digimon
     public int BattlesWon { get; set; }
     public int HoursInCurrentStage { get; set; }
     public int MinHoursInCurrentStage { get; set; }
+    public LocationEnum CurrentLocation { get; set; }
 
     public List<EvolutionRequirement> PossibleEvolutions { get; } = new();
 
@@ -117,6 +119,15 @@ public class PartnerDigimon : Digimon
     {
         Lifespan += LifespanGainOnEvolve;
         ApplySpeciesChange(nanimonData, resetStageTimer: false);
+    }
+
+    // Any In-Training, sleeps in a particular area. Real location/world
+    // state isn't designed yet - LocationEnum.PlaceholderArea stands in
+    // for "the area" until that exists. Sleep event and the 50% roll stay
+    // external.
+    public bool CanEvolveToKunemon()
+    {
+        return Level == DigimonLevelEnum.InTraining && CurrentLocation == LocationEnum.PlaceholderArea;
     }
 
     // Any rookie except Penguinmon, when it loses a life. The life-loss
