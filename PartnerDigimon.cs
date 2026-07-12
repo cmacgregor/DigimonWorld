@@ -8,6 +8,8 @@ public class PartnerDigimon : Digimon
     public const int AirdramonChancePercent = 30;
     public const int CoelamonChancePercent = 30;
     public const int CoelamonRequiredHoursInCurrentStage = 200;
+    public const int NinjamonChancePercent = 30;
+    public const int NinjamonRequiredBattlesFought = 50;
 
     public ActiveTimeEnum ActiveTime { get; set; }
     public string Nickname { get; set; }
@@ -130,6 +132,17 @@ public class PartnerDigimon : Digimon
     {
         return (SpeciesId == whamonSpeciesId || SpeciesId == shellmonSpeciesId)
             && HoursInCurrentStage == CoelamonRequiredHoursInCurrentStage;
+    }
+
+    // Vegimon specifically, sleeps with Discipline 100 and more than 50
+    // battles fought (the list says "battles won" - using BattlesFought as
+    // the closest tracked stat since there's no separate win counter).
+    // Sleep event and the 30% roll stay external.
+    public bool CanEvolveToNinjamon(int vegimonSpeciesId)
+    {
+        return SpeciesId == vegimonSpeciesId
+            && Discipline == 100
+            && BattlesFought > NinjamonRequiredBattlesFought;
     }
 
     // Item-triggered evolution to a specific target. Still restricted to

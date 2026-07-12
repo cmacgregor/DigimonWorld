@@ -250,6 +250,22 @@ public class DigimonEvolutionDataTests
     }
 
     [Fact]
+    public void CanEvolveToNinjamon_RequiresVegimonFullDisciplineAndOver50Battles()
+    {
+        const int vegimonId = 30;
+
+        var eligible = new PartnerDigimon { SpeciesId = vegimonId, Discipline = 100, BattlesFought = 51 };
+        var notEnoughBattles = new PartnerDigimon { SpeciesId = vegimonId, Discipline = 100, BattlesFought = 50 };
+        var disciplineNotFull = new PartnerDigimon { SpeciesId = vegimonId, Discipline = 99, BattlesFought = 51 };
+        var wrongSpecies = new PartnerDigimon { SpeciesId = 7, Discipline = 100, BattlesFought = 51 };
+
+        Assert.True(eligible.CanEvolveToNinjamon(vegimonId));
+        Assert.False(notEnoughBattles.CanEvolveToNinjamon(vegimonId));
+        Assert.False(disciplineNotFull.CanEvolveToNinjamon(vegimonId));
+        Assert.False(wrongSpecies.CanEvolveToNinjamon(vegimonId));
+    }
+
+    [Fact]
     public void EvolveWithItem_ChangesSpeciesWithNoStatOrLifespanChange_WhenTargetIsInPossibleEvolutions()
     {
         var partner = new PartnerDigimon
