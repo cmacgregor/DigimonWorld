@@ -38,15 +38,27 @@ public class PartnerDigimon : Digimon
     // neglecting a hungry Digimon while it's training is worse - it's
     // state on the partner itself (set by whatever starts/stops a
     // training session), not something the world clock knows about.
-    // isSleeping represents a full sleep session (the caller passes its
-    // whole duration, e.g. ~9h, in one call): it freezes Hunger's neglect
-    // timer and switches Energy's starvation weight loss to the flat
-    // per-hour sleep rate, since Energy can't replenish without eating.
+    public void AdvanceTime(int minutes)
+    {
+        Tick(minutes, isSleeping: false);
+    }
+
+    // Invoked by the player's sleep command (enabled once Sleep.Sleepy is
+    // true) rather than the regular world-clock tick - the caller passes
+    // the whole sleep session's duration (e.g. ~9h) in one call. Freezes
+    // Hunger's neglect timer and switches Energy's starvation weight loss
+    // to the flat per-hour sleep rate, since Energy can't replenish
+    // without eating.
+    public void AdvanceTimeAsleep(int minutes)
+    {
+        Tick(minutes, isSleeping: true);
+    }
+
     // HoursInCurrentStage only ticks once full 60-minute chunks
     // accumulate, so its existing whole-hour semantics (and the
     // hour-based evolution thresholds in EvolutionRequirement/
     // SpecialEvolutions) stay unchanged.
-    public void AdvanceTime(int minutes, bool isSleeping = false)
+    private void Tick(int minutes, bool isSleeping)
     {
         MinuteOfHour += minutes;
         var wholeHours = MinuteOfHour / MinutesPerHour;

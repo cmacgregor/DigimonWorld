@@ -38,4 +38,18 @@ public class GameStateTests
 
         Assert.Equal(5, gameState.CurrentTime.HourOfDay);
     }
+
+    [Fact]
+    public void Sleep_AdvancesWorldClockAndTellsThePartnerItsAsleep()
+    {
+        var gameState = new GameState
+        {
+            CurrentPartner = new PartnerDigimon { Hunger = { Gauge = 1 } },
+        };
+
+        gameState.Sleep(91); // would incur a neglect care mistake while awake
+
+        Assert.Equal(1, gameState.CurrentTime.HourOfDay);
+        Assert.Equal(0, gameState.CurrentPartner.CareMistakes);
+    }
 }

@@ -144,21 +144,21 @@ public class PartnerDigimonTests
     }
 
     [Fact]
-    public void AdvanceTime_WhileSleeping_LosesWeightByTheHour_WhenHungry()
+    public void AdvanceTimeAsleep_LosesWeightByTheHour_WhenHungry()
     {
         var partner = new PartnerDigimon { Hunger = { Gauge = 0 }, Weight = 500 };
 
-        partner.AdvanceTime(9 * PartnerDigimon.MinutesPerHour, isSleeping: true);
+        partner.AdvanceTimeAsleep(9 * PartnerDigimon.MinutesPerHour);
 
         Assert.Equal(491, partner.Weight); // 500 - 9g for 9 hours asleep while hungry
     }
 
     [Fact]
-    public void AdvanceTime_WhileSleeping_FreezesTheHungerNeglectCareMistakeTimer()
+    public void AdvanceTimeAsleep_FreezesTheHungerNeglectCareMistakeTimer()
     {
         var partner = new PartnerDigimon { Hunger = { Gauge = 1 } };
 
-        partner.AdvanceTime(91, isSleeping: true);
+        partner.AdvanceTimeAsleep(91);
 
         Assert.False(partner.Hunger.CareMistakeApplied);
         Assert.Equal(0, partner.CareMistakes);
@@ -166,11 +166,11 @@ public class PartnerDigimonTests
     }
 
     [Fact]
-    public void AdvanceTime_WhileSleeping_StillAdvancesStageTimerAndSleepGauge()
+    public void AdvanceTimeAsleep_StillAdvancesStageTimerAndSleepGauge()
     {
         var partner = new PartnerDigimon { HoursInCurrentStage = 0, Sleep = { Gauge = 0 } };
 
-        partner.AdvanceTime(90, isSleeping: true); // 1h30m
+        partner.AdvanceTimeAsleep(90); // 1h30m
 
         Assert.Equal(1, partner.HoursInCurrentStage);
         Assert.Equal(1, partner.Sleep.Gauge);
