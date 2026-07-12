@@ -173,6 +173,35 @@ public class DigimonEvolutionDataTests
     }
 
     [Fact]
+    public void Evolve_SameLevelEvolution_AppliesNormalStatGainButKeepsStageTimer()
+    {
+        var partner = new PartnerDigimon
+        {
+            Attack = 50,
+            HoursInCurrentStage = 50,
+        };
+
+        partner.Evolve(new DigimonEvolutionData { ReferenceAttack = 100 }, isSameLevelEvolution: true);
+
+        Assert.Equal(75, partner.Attack); // normal gain formula still applies
+        Assert.Equal(50, partner.HoursInCurrentStage); // same-level - timer not reset
+    }
+
+    [Fact]
+    public void CanEvolveToBakemon_ExcludesPenguinmonButAllowsOtherRookies()
+    {
+        const int penguinmonId = 42;
+
+        var penguinmon = new PartnerDigimon { Level = DigimonLevelEnum.Rookie, SpeciesId = penguinmonId };
+        var otherRookie = new PartnerDigimon { Level = DigimonLevelEnum.Rookie, SpeciesId = 7 };
+        var wrongLevel = new PartnerDigimon { Level = DigimonLevelEnum.Champion, SpeciesId = 7 };
+
+        Assert.False(penguinmon.CanEvolveToBakemon(penguinmonId));
+        Assert.True(otherRookie.CanEvolveToBakemon(penguinmonId));
+        Assert.False(wrongLevel.CanEvolveToBakemon(penguinmonId));
+    }
+
+    [Fact]
     public void EvolveWithItem_ChangesSpeciesWithNoStatOrLifespanChange_WhenTargetIsInPossibleEvolutions()
     {
         var partner = new PartnerDigimon

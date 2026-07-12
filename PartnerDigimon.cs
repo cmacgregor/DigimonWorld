@@ -3,6 +3,7 @@ using System.Collections.Generic;
 public class PartnerDigimon : Digimon
 {
     public const int LifespanGainOnEvolve = 96;
+    public const int BakemonChancePercent = 10;
 
     public ActiveTimeEnum ActiveTime { get; set; }
     public string Nickname { get; set; }
@@ -40,7 +41,10 @@ public class PartnerDigimon : Digimon
         return null;
     }
 
-    public void Evolve(DigimonEvolutionData newSpeciesData)
+    // isSameLevelEvolution is true for special same-level cases (Bakemon,
+    // Devimon, etc.) that still use the normal stat-gain formula but
+    // shouldn't reset progress toward the next real level.
+    public void Evolve(DigimonEvolutionData newSpeciesData, bool isSameLevelEvolution = false)
     {
         Attack += DigimonEvolutionData.CalculateStatGain(Attack, newSpeciesData.ReferenceAttack);
         Defense += DigimonEvolutionData.CalculateStatGain(Defense, newSpeciesData.ReferenceDefense);
@@ -50,7 +54,7 @@ public class PartnerDigimon : Digimon
         MaxMP += DigimonEvolutionData.CalculateStatGain(MaxMP, newSpeciesData.ReferenceMaxMP);
 
         Lifespan += LifespanGainOnEvolve;
-        ApplySpeciesChange(newSpeciesData);
+        ApplySpeciesChange(newSpeciesData, resetStageTimer: !isSameLevelEvolution);
     }
 
     // Triggered externally when the poop gauge is full - halves every stat
@@ -86,6 +90,15 @@ public class PartnerDigimon : Digimon
     {
         Lifespan += LifespanGainOnEvolve;
         ApplySpeciesChange(nanimonData, resetStageTimer: false);
+    }
+
+    // Any rookie except Penguinmon, when it loses a life. The life-loss
+    // event and the percent roll both happen externally - this only
+    // checks the deterministic part (right level, not the excluded
+    // species). On success, call Evolve(bakemonData, isSameLevelEvolution: true).
+    public bool CanEvolveToBakemon(int penguinmonSpeciesId)
+    {
+        return Level == DigimonLevelEnum.Rookie && SpeciesId != penguinmonSpeciesId;
     }
 
     // Item-triggered evolution to a specific target. Still restricted to
