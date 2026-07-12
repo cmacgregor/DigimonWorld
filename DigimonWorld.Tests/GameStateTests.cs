@@ -21,7 +21,7 @@ public class GameStateTests
     {
         var gameState = new GameState
         {
-            CurrentPartner = new PartnerDigimon { HungerGauge = 1 },
+            CurrentPartner = new PartnerDigimon { Hunger = { Gauge = 1 } },
         };
 
         gameState.AdvanceTime(91, isTraining: true);
