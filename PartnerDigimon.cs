@@ -12,7 +12,8 @@ public class PartnerDigimon : Digimon
     public int Age { get; set; }
     public int Weight { get; set; }
     public bool Hungry { get; set; }
-    public bool Potty { get; set; }
+    public bool NeedsToPotty { get; set; }
+    public int PottyGauge { get; set; }
     public bool Injured { get; set; }
     public bool Sleepy { get; set; }
     public bool Overworked { get; set; }
@@ -52,23 +53,27 @@ public class PartnerDigimon : Digimon
     }
 
     // Triggered externally when the poop gauge is full - halves every stat
-    // instead of applying the normal reference-stat gain formula.
+    // instead of applying the normal reference-stat gain formula. Still
+    // grants the normal lifespan bonus.
     public void EvolveToSukamon(DigimonEvolutionData sukamonData)
     {
         ApplyStatPenaltyPercent(50);
+        Lifespan += LifespanGainOnEvolve;
         ApplySpeciesChange(sukamonData);
     }
 
     // Triggered externally when a rookie hits its time gate without meeting
     // any evolution's requirements - a 20% stat penalty instead of a gain.
+    // Still grants the normal lifespan bonus.
     public void EvolveToNumemon(DigimonEvolutionData numemonData)
     {
         ApplyStatPenaltyPercent(20);
+        Lifespan += LifespanGainOnEvolve;
         ApplySpeciesChange(numemonData);
     }
 
-    // Item-triggered evolution to a specific target - no stat gain, no
-    // lifespan gain, just the species change.
+    // Item-triggered evolution to a specific target. The only evolution
+    // path with no stat gain and no lifespan gain - just the species change.
     public void EvolveWithItem(DigimonEvolutionData targetSpeciesData)
     {
         ApplySpeciesChange(targetSpeciesData);
