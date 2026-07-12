@@ -202,6 +202,20 @@ public class DigimonEvolutionDataTests
     }
 
     [Fact]
+    public void CanEvolveToDevimon_RequiresAngemonSpecificallyWithLowDiscipline()
+    {
+        const int angemonId = 99;
+
+        var eligible = new PartnerDigimon { SpeciesId = angemonId, Discipline = 50 };
+        var disciplineTooHigh = new PartnerDigimon { SpeciesId = angemonId, Discipline = 51 };
+        var wrongSpecies = new PartnerDigimon { SpeciesId = 7, Discipline = 0 };
+
+        Assert.True(eligible.CanEvolveToDevimon(angemonId));
+        Assert.False(disciplineTooHigh.CanEvolveToDevimon(angemonId));
+        Assert.False(wrongSpecies.CanEvolveToDevimon(angemonId));
+    }
+
+    [Fact]
     public void EvolveWithItem_ChangesSpeciesWithNoStatOrLifespanChange_WhenTargetIsInPossibleEvolutions()
     {
         var partner = new PartnerDigimon

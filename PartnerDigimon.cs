@@ -4,6 +4,7 @@ public class PartnerDigimon : Digimon
 {
     public const int LifespanGainOnEvolve = 96;
     public const int BakemonChancePercent = 10;
+    public const int DevimonChancePercent = 50;
 
     public ActiveTimeEnum ActiveTime { get; set; }
     public string Nickname { get; set; }
@@ -99,6 +100,13 @@ public class PartnerDigimon : Digimon
     public bool CanEvolveToBakemon(int penguinmonSpeciesId)
     {
         return Level == DigimonLevelEnum.Rookie && SpeciesId != penguinmonSpeciesId;
+    }
+
+    // Angemon specifically, when it loses a life with Discipline <= 50.
+    // Life-loss event and the 50% roll both stay external.
+    public bool CanEvolveToDevimon(int angemonSpeciesId)
+    {
+        return SpeciesId == angemonSpeciesId && Discipline <= 50;
     }
 
     // Item-triggered evolution to a specific target. Still restricted to
