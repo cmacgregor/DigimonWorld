@@ -1,0 +1,437 @@
+using Xunit;
+
+public class DigimonEvolutionDataTests
+{
+    [Fact]
+    public void CalculateStatGain_WhenAtOrBelowReference_IsHalfTheDifference()
+    {
+        Assert.Equal(25, DigimonEvolutionData.CalculateStatGain(currentStat: 50, referenceStat: 100));
+        Assert.Equal(0, DigimonEvolutionData.CalculateStatGain(currentStat: 100, referenceStat: 100));
+    }
+
+    [Fact]
+    public void CalculateStatGain_WhenAboveReference_IsOneTenthOfReference()
+    {
+        Assert.Equal(10, DigimonEvolutionData.CalculateStatGain(currentStat: 150, referenceStat: 100));
+    }
+
+    [Fact]
+    public void Evolve_AppliesStatGainToEachStatIndependently()
+    {
+        var partner = new PartnerDigimon
+        {
+            Attack = 50,
+            Defense = 150,
+            Speed = 0,
+            Brains = 0,
+            MaxHP = 0,
+            MaxMP = 0,
+        };
+
+        var greymonData = new DigimonEvolutionData
+        {
+            SpeciesId = 4,
+            ReferenceAttack = 100,
+            ReferenceDefense = 100,
+            ReferenceSpeed = 100,
+            ReferenceBrains = 100,
+            ReferenceMaxHP = 100,
+            ReferenceMaxMP = 100,
+        };
+
+        partner.Evolve(greymonData);
+
+        Assert.Equal(4, partner.SpeciesId);
+        Assert.Equal(75, partner.Attack); // 50 <= 100: 50 + (100-50)/2
+        Assert.Equal(160, partner.Defense); // 150 > 100: 150 + 100/10
+        Assert.Equal(50, partner.Speed); // 0 <= 100: 0 + (100-0)/2
+    }
+
+    [Fact]
+    public void Evolve_ResetsHoursInCurrentStageAndRefreshesPossibleEvolutions()
+    {
+        var partner = new PartnerDigimon { HoursInCurrentStage = 100 };
+        partner.PossibleEvolutions.Add(new EvolutionRequirement { TargetName = "Stale" });
+
+        var newRequirement = new EvolutionRequirement { TargetName = "MetalGreymon" };
+        var newSpeciesData = new DigimonEvolutionData { SpeciesId = 5 };
+        newSpeciesData.PossibleEvolutions.Add(newRequirement);
+
+        partner.Evolve(newSpeciesData);
+
+        Assert.Equal(0, partner.HoursInCurrentStage);
+        Assert.Single(partner.PossibleEvolutions);
+        Assert.Same(newRequirement, partner.PossibleEvolutions[0]);
+    }
+
+    [Fact]
+    public void Evolve_ResetsCareMistakesAndBattlesFoughtAndWon()
+    {
+        var partner = new PartnerDigimon
+        {
+            CareMistakes = 5,
+            BattlesFought = 42,
+            BattlesWon = 30,
+        };
+
+        partner.Evolve(new DigimonEvolutionData());
+
+        Assert.Equal(0, partner.CareMistakes);
+        Assert.Equal(0, partner.BattlesFought);
+        Assert.Equal(0, partner.BattlesWon);
+    }
+
+    [Fact]
+    public void Evolve_AlwaysGrantsAFlatLifespanBonus()
+    {
+        var partner = new PartnerDigimon { Lifespan = 200 };
+
+        partner.Evolve(new DigimonEvolutionData());
+
+        Assert.Equal(200 + PartnerDigimon.LifespanGainOnEvolve, partner.Lifespan);
+    }
+
+    [Fact]
+    public void EvolveToSukamon_HalvesEveryStatButStillGrantsLifespan()
+    {
+        var partner = new PartnerDigimon
+        {
+            Attack = 100,
+            Defense = 51,
+            Lifespan = 200,
+        };
+
+        partner.EvolveToSukamon(new DigimonEvolutionData { SpeciesId = 999 });
+
+        Assert.Equal(999, partner.SpeciesId);
+        Assert.Equal(50, partner.Attack);
+        Assert.Equal(25, partner.Defense); // 51 * 50 / 100, truncated
+        Assert.Equal(200 + PartnerDigimon.LifespanGainOnEvolve, partner.Lifespan);
+    }
+
+    [Fact]
+    public void EvolveToNumemon_ReducesEveryStatByTwentyPercentButStillGrantsLifespan()
+    {
+        var partner = new PartnerDigimon
+        {
+            Attack = 100,
+            Lifespan = 200,
+        };
+
+        partner.EvolveToNumemon(new DigimonEvolutionData { SpeciesId = 998 });
+
+        Assert.Equal(998, partner.SpeciesId);
+        Assert.Equal(80, partner.Attack);
+        Assert.Equal(200 + PartnerDigimon.LifespanGainOnEvolve, partner.Lifespan);
+    }
+
+    [Fact]
+    public void CanEvolveToNanimon_RequiresRookieLevelAndZeroHappinessAndDiscipline()
+    {
+        var eligible = new PartnerDigimon
+        {
+            Level = DigimonLevelEnum.Rookie,
+            Happiness = 0,
+            Discipline = 0,
+        };
+        var wrongLevel = new PartnerDigimon
+        {
+            Level = DigimonLevelEnum.Champion,
+            Happiness = 0,
+            Discipline = 0,
+        };
+        var happinessNotZero = new PartnerDigimon
+        {
+            Level = DigimonLevelEnum.Rookie,
+            Happiness = 1,
+            Discipline = 0,
+        };
+
+        Assert.True(eligible.CanEvolveToNanimon());
+        Assert.False(wrongLevel.CanEvolveToNanimon());
+        Assert.False(happinessNotZero.CanEvolveToNanimon());
+    }
+
+    [Fact]
+    public void EvolveToNanimon_ChangesSpeciesWithNoStatChangeButGrantsLifespan_AndKeepsStageTimer()
+    {
+        var partner = new PartnerDigimon
+        {
+            Attack = 100,
+            Lifespan = 200,
+            HoursInCurrentStage = 50,
+        };
+
+        partner.EvolveToNanimon(new DigimonEvolutionData
+        {
+            SpeciesId = 997,
+            ReferenceAttack = 999,
+        });
+
+        Assert.Equal(997, partner.SpeciesId);
+        Assert.Equal(100, partner.Attack); // unchanged
+        Assert.Equal(200 + PartnerDigimon.LifespanGainOnEvolve, partner.Lifespan);
+        Assert.Equal(50, partner.HoursInCurrentStage); // same-level - timer not reset
+    }
+
+    [Fact]
+    public void Evolve_SameLevelEvolution_AppliesNormalStatGainButKeepsStageTimer()
+    {
+        var partner = new PartnerDigimon
+        {
+            Attack = 50,
+            HoursInCurrentStage = 50,
+        };
+
+        partner.Evolve(new DigimonEvolutionData { ReferenceAttack = 100 }, isSameLevelEvolution: true);
+
+        Assert.Equal(75, partner.Attack); // normal gain formula still applies
+        Assert.Equal(50, partner.HoursInCurrentStage); // same-level - timer not reset
+    }
+
+    [Fact]
+    public void CanEvolveToKunemon_RequiresInTrainingInThePlaceholderArea()
+    {
+        var eligible = new PartnerDigimon { Level = DigimonLevelEnum.InTraining, CurrentLocation = LocationEnum.PlaceholderArea };
+        var wrongLevel = new PartnerDigimon { Level = DigimonLevelEnum.Rookie, CurrentLocation = LocationEnum.PlaceholderArea };
+        var wrongLocation = new PartnerDigimon { Level = DigimonLevelEnum.InTraining, CurrentLocation = LocationEnum.None };
+
+        Assert.True(eligible.CanEvolveToKunemon());
+        Assert.False(wrongLevel.CanEvolveToKunemon());
+        Assert.False(wrongLocation.CanEvolveToKunemon());
+    }
+
+    [Fact]
+    public void CanEvolveToBakemon_ExcludesPenguinmonButAllowsOtherRookies()
+    {
+        const int penguinmonId = 42;
+
+        var penguinmon = new PartnerDigimon { Level = DigimonLevelEnum.Rookie, SpeciesId = penguinmonId };
+        var otherRookie = new PartnerDigimon { Level = DigimonLevelEnum.Rookie, SpeciesId = 7 };
+        var wrongLevel = new PartnerDigimon { Level = DigimonLevelEnum.Champion, SpeciesId = 7 };
+
+        Assert.False(penguinmon.CanEvolveToBakemon(penguinmonId));
+        Assert.True(otherRookie.CanEvolveToBakemon(penguinmonId));
+        Assert.False(wrongLevel.CanEvolveToBakemon(penguinmonId));
+    }
+
+    [Fact]
+    public void CanEvolveToDevimon_RequiresAngemonSpecificallyWithLowDiscipline()
+    {
+        const int angemonId = 99;
+
+        var eligible = new PartnerDigimon { SpeciesId = angemonId, Discipline = 50 };
+        var disciplineTooHigh = new PartnerDigimon { SpeciesId = angemonId, Discipline = 51 };
+        var wrongSpecies = new PartnerDigimon { SpeciesId = 7, Discipline = 0 };
+
+        Assert.True(eligible.CanEvolveToDevimon(angemonId));
+        Assert.False(disciplineTooHigh.CanEvolveToDevimon(angemonId));
+        Assert.False(wrongSpecies.CanEvolveToDevimon(angemonId));
+    }
+
+    [Fact]
+    public void CanEvolveToAirdramon_AllowsEitherSeadramonOrBirdramonAtFullDisciplineAndHappiness()
+    {
+        const int seadramonId = 10;
+        const int birdramonId = 11;
+
+        var seadramonEligible = new PartnerDigimon { SpeciesId = seadramonId, Discipline = 100, Happiness = 100 };
+        var birdramonEligible = new PartnerDigimon { SpeciesId = birdramonId, Discipline = 100, Happiness = 100 };
+        var wrongSpecies = new PartnerDigimon { SpeciesId = 7, Discipline = 100, Happiness = 100 };
+        var happinessTooLow = new PartnerDigimon { SpeciesId = seadramonId, Discipline = 100, Happiness = 99 };
+
+        Assert.True(seadramonEligible.CanEvolveToAirdramon(seadramonId, birdramonId));
+        Assert.True(birdramonEligible.CanEvolveToAirdramon(seadramonId, birdramonId));
+        Assert.False(wrongSpecies.CanEvolveToAirdramon(seadramonId, birdramonId));
+        Assert.False(happinessTooLow.CanEvolveToAirdramon(seadramonId, birdramonId));
+    }
+
+    [Fact]
+    public void CanEvolveToAirdramon_RequiresTirednessGaugeExactlyZero()
+    {
+        const int seadramonId = 10;
+        const int birdramonId = 11;
+
+        var tired = new PartnerDigimon
+        {
+            SpeciesId = seadramonId,
+            Discipline = 100,
+            Happiness = 100,
+            TirednessGauge = 80,
+        };
+        var restedButNotZero = new PartnerDigimon
+        {
+            SpeciesId = seadramonId,
+            Discipline = 100,
+            Happiness = 100,
+            TirednessGauge = 1,
+        };
+
+        Assert.False(tired.CanEvolveToAirdramon(seadramonId, birdramonId));
+        Assert.False(restedButNotZero.CanEvolveToAirdramon(seadramonId, birdramonId));
+    }
+
+    [Fact]
+    public void Tiredness_ReflectsGaugeThresholds()
+    {
+        var rested = new PartnerDigimon { TirednessGauge = 79 };
+        var tired = new PartnerDigimon { TirednessGauge = 80 };
+        var stillTired = new PartnerDigimon { TirednessGauge = 99 };
+        var overworked = new PartnerDigimon { TirednessGauge = 100 };
+
+        Assert.Equal(TirednessEnum.Rested, rested.Tiredness);
+        Assert.Equal(TirednessEnum.Tired, tired.Tiredness);
+        Assert.Equal(TirednessEnum.Tired, stillTired.Tiredness);
+        Assert.Equal(TirednessEnum.Overworked, overworked.Tiredness);
+    }
+
+    [Fact]
+    public void CanEvolveToCoelamon_AllowsEitherWhamonOrShellmonAtExactly200Hours()
+    {
+        const int whamonId = 20;
+        const int shellmonId = 21;
+
+        var whamonEligible = new PartnerDigimon { SpeciesId = whamonId, HoursInCurrentStage = 200 };
+        var shellmonEligible = new PartnerDigimon { SpeciesId = shellmonId, HoursInCurrentStage = 200 };
+        var wrongSpecies = new PartnerDigimon { SpeciesId = 7, HoursInCurrentStage = 200 };
+        var wrongHour = new PartnerDigimon { SpeciesId = whamonId, HoursInCurrentStage = 201 };
+
+        Assert.True(whamonEligible.CanEvolveToCoelamon(whamonId, shellmonId));
+        Assert.True(shellmonEligible.CanEvolveToCoelamon(whamonId, shellmonId));
+        Assert.False(wrongSpecies.CanEvolveToCoelamon(whamonId, shellmonId));
+        Assert.False(wrongHour.CanEvolveToCoelamon(whamonId, shellmonId));
+    }
+
+    [Fact]
+    public void CanEvolveToNinjamon_RequiresVegimonFullDisciplineAndOver50BattlesWon()
+    {
+        const int vegimonId = 30;
+
+        var eligible = new PartnerDigimon { SpeciesId = vegimonId, Discipline = 100, BattlesWon = 51 };
+        var notEnoughBattles = new PartnerDigimon { SpeciesId = vegimonId, Discipline = 100, BattlesWon = 50 };
+        var disciplineNotFull = new PartnerDigimon { SpeciesId = vegimonId, Discipline = 99, BattlesWon = 51 };
+        var wrongSpecies = new PartnerDigimon { SpeciesId = 7, Discipline = 100, BattlesWon = 51 };
+
+        Assert.True(eligible.CanEvolveToNinjamon(vegimonId));
+        Assert.False(notEnoughBattles.CanEvolveToNinjamon(vegimonId));
+        Assert.False(disciplineNotFull.CanEvolveToNinjamon(vegimonId));
+        Assert.False(wrongSpecies.CanEvolveToNinjamon(vegimonId));
+    }
+
+    [Fact]
+    public void CanEvolveToMonochromon_RequiresDrimogemonFullDisciplineAndDefenseAtLeast500()
+    {
+        const int drimogemonId = 40;
+
+        var eligible = new PartnerDigimon { SpeciesId = drimogemonId, Discipline = 100, Defense = 500 };
+        var defenseTooLow = new PartnerDigimon { SpeciesId = drimogemonId, Discipline = 100, Defense = 499 };
+        var disciplineNotFull = new PartnerDigimon { SpeciesId = drimogemonId, Discipline = 99, Defense = 500 };
+        var wrongSpecies = new PartnerDigimon { SpeciesId = 7, Discipline = 100, Defense = 500 };
+
+        Assert.True(eligible.CanEvolveToMonochromon(drimogemonId));
+        Assert.False(defenseTooLow.CanEvolveToMonochromon(drimogemonId));
+        Assert.False(disciplineNotFull.CanEvolveToMonochromon(drimogemonId));
+        Assert.False(wrongSpecies.CanEvolveToMonochromon(drimogemonId));
+    }
+
+    [Fact]
+    public void CanEvolveToVademonFromPraiseOrScold_RequiresChampionAtOrPast240Hours()
+    {
+        var eligible = new PartnerDigimon { Level = DigimonLevelEnum.Champion, HoursInCurrentStage = 240 };
+        var pastThreshold = new PartnerDigimon { Level = DigimonLevelEnum.Champion, HoursInCurrentStage = 300 };
+        var tooEarly = new PartnerDigimon { Level = DigimonLevelEnum.Champion, HoursInCurrentStage = 239 };
+        var wrongLevel = new PartnerDigimon { Level = DigimonLevelEnum.Rookie, HoursInCurrentStage = 240 };
+
+        Assert.True(eligible.CanEvolveToVademonFromPraiseOrScold());
+        Assert.True(pastThreshold.CanEvolveToVademonFromPraiseOrScold());
+        Assert.False(tooEarly.CanEvolveToVademonFromPraiseOrScold());
+        Assert.False(wrongLevel.CanEvolveToVademonFromPraiseOrScold());
+    }
+
+    [Fact]
+    public void CanEvolveToVademonFromTimeout_RequiresChampionAt360HoursWithNoEligibleEvolution()
+    {
+        var eligibleWithNoOptions = new PartnerDigimon { Level = DigimonLevelEnum.Champion, HoursInCurrentStage = 360 };
+
+        var hasAnEligibleEvolution = new PartnerDigimon { Level = DigimonLevelEnum.Champion, HoursInCurrentStage = 360 };
+        hasAnEligibleEvolution.PossibleEvolutions.Add(new EvolutionRequirement
+        {
+            TargetName = "SomeUltimate",
+            HappinessThreshold = 0,
+            DisciplineThreshold = 0,
+            MaxCareMistakes = 0,
+        });
+
+        var tooEarly = new PartnerDigimon { Level = DigimonLevelEnum.Champion, HoursInCurrentStage = 359 };
+        var wrongLevel = new PartnerDigimon { Level = DigimonLevelEnum.Rookie, HoursInCurrentStage = 360 };
+
+        Assert.True(eligibleWithNoOptions.CanEvolveToVademonFromTimeout());
+        Assert.False(hasAnEligibleEvolution.CanEvolveToVademonFromTimeout());
+        Assert.False(tooEarly.CanEvolveToVademonFromTimeout());
+        Assert.False(wrongLevel.CanEvolveToVademonFromTimeout());
+    }
+
+    [Fact]
+    public void CanEvolveToPhoenixmon_RequiresKokatorimonSpecifically()
+    {
+        const int kokatorimonId = 50;
+
+        var eligible = new PartnerDigimon { SpeciesId = kokatorimonId };
+        var wrongSpecies = new PartnerDigimon { SpeciesId = 7 };
+
+        Assert.True(eligible.CanEvolveToPhoenixmon(kokatorimonId));
+        Assert.False(wrongSpecies.CanEvolveToPhoenixmon(kokatorimonId));
+    }
+
+    [Fact]
+    public void CanEvolveToSkullgreymon_AllowsEitherMetalGreymonOrMegadramon()
+    {
+        const int metalGreymonId = 60;
+        const int megadramonId = 61;
+
+        var metalGreymonEligible = new PartnerDigimon { SpeciesId = metalGreymonId };
+        var megadramonEligible = new PartnerDigimon { SpeciesId = megadramonId };
+        var wrongSpecies = new PartnerDigimon { SpeciesId = 7 };
+
+        Assert.True(metalGreymonEligible.CanEvolveToSkullgreymon(metalGreymonId, megadramonId));
+        Assert.True(megadramonEligible.CanEvolveToSkullgreymon(metalGreymonId, megadramonId));
+        Assert.False(wrongSpecies.CanEvolveToSkullgreymon(metalGreymonId, megadramonId));
+    }
+
+    [Fact]
+    public void EvolveWithItem_ChangesSpeciesWithNoStatOrLifespanChange_WhenTargetIsInPossibleEvolutions()
+    {
+        var partner = new PartnerDigimon
+        {
+            Attack = 100,
+            Defense = 100,
+            Lifespan = 200,
+        };
+        partner.PossibleEvolutions.Add(new EvolutionRequirement { TargetDigimonId = 4 });
+
+        var succeeded = partner.EvolveWithItem(new DigimonEvolutionData
+        {
+            SpeciesId = 4,
+            ReferenceAttack = 999,
+            ReferenceDefense = 999,
+        });
+
+        Assert.True(succeeded);
+        Assert.Equal(4, partner.SpeciesId);
+        Assert.Equal(100, partner.Attack);
+        Assert.Equal(100, partner.Defense);
+        Assert.Equal(200, partner.Lifespan);
+    }
+
+    [Fact]
+    public void EvolveWithItem_FailsWhenTargetIsNotInPossibleEvolutions()
+    {
+        var partner = new PartnerDigimon { SpeciesId = 1 };
+        partner.PossibleEvolutions.Add(new EvolutionRequirement { TargetDigimonId = 4 });
+
+        var succeeded = partner.EvolveWithItem(new DigimonEvolutionData { SpeciesId = 999 });
+
+        Assert.False(succeeded);
+        Assert.Equal(1, partner.SpeciesId); // unchanged
+    }
+}

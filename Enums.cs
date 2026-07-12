@@ -34,3 +34,28 @@ public enum StatusEffectEnum
     Poison,
     Stun,
 }
+
+public enum DigimonLevelEnum
+{
+    None,
+    Baby,
+    InTraining,
+    Rookie,
+    Champion,
+    Ultimate,
+}
+
+public enum TirednessEnum
+{
+    Rested,
+    Tired,
+    Overworked,
+}
+
+// Placeholder until real location/world state is designed - just enough
+// to represent "which area is the Digimon currently in."
+public enum LocationEnum
+{
+    None,
+    PlaceholderArea,
+}
