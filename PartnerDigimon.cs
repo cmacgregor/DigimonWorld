@@ -56,6 +56,19 @@ public class PartnerDigimon : Digimon
         SleepGauge += hours;
     }
 
+    // Shared application point for training/battle/food stat gains -
+    // each source computes its own StatGains elsewhere and applies it
+    // here, regardless of which stats it actually touches.
+    public void ApplyStatGains(StatGains gains)
+    {
+        Attack += gains.Attack;
+        Defense += gains.Defense;
+        Speed += gains.Speed;
+        Brains += gains.Brains;
+        MaxHP += gains.MaxHP;
+        MaxMP += gains.MaxMP;
+    }
+
     public EvolutionRequirement GetEligibleEvolution()
     {
         foreach (var requirement in PossibleEvolutions)
