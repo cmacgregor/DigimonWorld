@@ -94,7 +94,7 @@ public class PartnerDigimonTests
             Sleep = { Gauge = 2 },
         };
 
-        partner.AdvanceTime(3 * PartnerDigimon.MinutesPerHour); // 3 hours
+        partner.AdvanceTime(3 * WorldTime.MinutesPerHour); // 3 hours
 
         Assert.Equal(13, partner.HoursInCurrentStage);
         Assert.Equal(20, partner.Hunger.Gauge); // 200 - 180 minutes
@@ -148,7 +148,7 @@ public class PartnerDigimonTests
     {
         var partner = new PartnerDigimon { Hunger = { Gauge = 0 }, Weight = 500 };
 
-        partner.AdvanceTimeAsleep(9 * PartnerDigimon.MinutesPerHour);
+        partner.AdvanceTimeAsleep(9 * WorldTime.MinutesPerHour);
 
         Assert.Equal(491, partner.Weight); // 500 - 9g for 9 hours asleep while hungry
     }

@@ -60,7 +60,7 @@ public class EnergySystemTests
     {
         var energy = new EnergySystem();
 
-        var gramsLost = energy.Advance(9 * PartnerDigimon.MinutesPerHour, wholeHours: 9, hungry: true, isSleeping: true);
+        var gramsLost = energy.Advance(9 * WorldTime.MinutesPerHour, wholeHours: 9, hungry: true, isSleeping: true);
 
         Assert.Equal(9, gramsLost);
     }
@@ -70,7 +70,7 @@ public class EnergySystemTests
     {
         var energy = new EnergySystem();
 
-        var gramsLost = energy.Advance(9 * PartnerDigimon.MinutesPerHour, wholeHours: 9, hungry: false, isSleeping: true);
+        var gramsLost = energy.Advance(9 * WorldTime.MinutesPerHour, wholeHours: 9, hungry: false, isSleeping: true);
 
         Assert.Equal(0, gramsLost);
     }

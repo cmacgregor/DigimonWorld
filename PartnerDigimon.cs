@@ -3,7 +3,6 @@ using System.Collections.Generic;
 public class PartnerDigimon : Digimon
 {
     public const int LifespanGainOnEvolve = 96;
-    public const int MinutesPerHour = 60;
 
     public ActiveTimeEnum ActiveTime { get; set; }
     public string Nickname { get; set; }
@@ -61,8 +60,8 @@ public class PartnerDigimon : Digimon
     private void Tick(int minutes, bool isSleeping)
     {
         MinuteOfHour += minutes;
-        var wholeHours = MinuteOfHour / MinutesPerHour;
-        MinuteOfHour %= MinutesPerHour;
+        var wholeHours = MinuteOfHour / WorldTime.MinutesPerHour;
+        MinuteOfHour %= WorldTime.MinutesPerHour;
 
         HoursInCurrentStage += wholeHours;
         Sleep.Advance(wholeHours);
