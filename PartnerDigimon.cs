@@ -15,6 +15,7 @@ public class PartnerDigimon : Digimon
     public const int VademonPraiseOrScoldChancePercent = 50;
     public const int VademonPraiseOrScoldRequiredHoursInCurrentStage = 240;
     public const int VademonTimeoutRequiredHoursInCurrentStage = 360;
+    public const int PhoenixmonChancePercent = 10;
 
     public ActiveTimeEnum ActiveTime { get; set; }
     public string Nickname { get; set; }
@@ -175,6 +176,13 @@ public class PartnerDigimon : Digimon
         return Level == DigimonLevelEnum.Champion
             && HoursInCurrentStage >= VademonTimeoutRequiredHoursInCurrentStage
             && GetEligibleEvolution() == null;
+    }
+
+    // Kokatorimon specifically, when it loses a life. Life-loss event and
+    // the 10% roll stay external.
+    public bool CanEvolveToPhoenixmon(int kokatorimonSpeciesId)
+    {
+        return SpeciesId == kokatorimonSpeciesId;
     }
 
     // Item-triggered evolution to a specific target. Still restricted to

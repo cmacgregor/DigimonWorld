@@ -319,6 +319,18 @@ public class DigimonEvolutionDataTests
     }
 
     [Fact]
+    public void CanEvolveToPhoenixmon_RequiresKokatorimonSpecifically()
+    {
+        const int kokatorimonId = 50;
+
+        var eligible = new PartnerDigimon { SpeciesId = kokatorimonId };
+        var wrongSpecies = new PartnerDigimon { SpeciesId = 7 };
+
+        Assert.True(eligible.CanEvolveToPhoenixmon(kokatorimonId));
+        Assert.False(wrongSpecies.CanEvolveToPhoenixmon(kokatorimonId));
+    }
+
+    [Fact]
     public void EvolveWithItem_ChangesSpeciesWithNoStatOrLifespanChange_WhenTargetIsInPossibleEvolutions()
     {
         var partner = new PartnerDigimon
