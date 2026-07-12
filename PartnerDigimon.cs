@@ -136,14 +136,15 @@ public class PartnerDigimon : Digimon
     }
 
     // Seadramon or Birdramon, wakes up with Discipline and Happiness both
-    // at 100 and Rested tiredness. Wake-up event and the 30% roll stay
-    // external.
+    // at 100 and TirednessGauge at exactly 0 (not just Rested - the whole
+    // range up to 79 counts as Rested, but this needs the literal floor).
+    // Wake-up event and the 30% roll stay external.
     public bool CanEvolveToAirdramon(int seadramonSpeciesId, int birdramonSpeciesId)
     {
         return (SpeciesId == seadramonSpeciesId || SpeciesId == birdramonSpeciesId)
             && Discipline == 100
             && Happiness == 100
-            && Tiredness == TirednessEnum.Rested;
+            && TirednessGauge == 0;
     }
 
     // Whamon or Shellmon, scolded or praised while the evolution counter

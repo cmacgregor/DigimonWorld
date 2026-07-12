@@ -235,7 +235,7 @@ public class DigimonEvolutionDataTests
     }
 
     [Fact]
-    public void CanEvolveToAirdramon_FailsWhenNotRested()
+    public void CanEvolveToAirdramon_RequiresTirednessGaugeExactlyZero()
     {
         const int seadramonId = 10;
         const int birdramonId = 11;
@@ -247,8 +247,16 @@ public class DigimonEvolutionDataTests
             Happiness = 100,
             TirednessGauge = 80,
         };
+        var restedButNotZero = new PartnerDigimon
+        {
+            SpeciesId = seadramonId,
+            Discipline = 100,
+            Happiness = 100,
+            TirednessGauge = 1,
+        };
 
         Assert.False(tired.CanEvolveToAirdramon(seadramonId, birdramonId));
+        Assert.False(restedButNotZero.CanEvolveToAirdramon(seadramonId, birdramonId));
     }
 
     [Fact]
