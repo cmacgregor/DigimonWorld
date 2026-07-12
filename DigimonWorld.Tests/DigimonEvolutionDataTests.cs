@@ -266,6 +266,22 @@ public class DigimonEvolutionDataTests
     }
 
     [Fact]
+    public void CanEvolveToMonochromon_RequiresDrimogemonFullDisciplineAndDefenseAtLeast500()
+    {
+        const int drimogemonId = 40;
+
+        var eligible = new PartnerDigimon { SpeciesId = drimogemonId, Discipline = 100, Defense = 500 };
+        var defenseTooLow = new PartnerDigimon { SpeciesId = drimogemonId, Discipline = 100, Defense = 499 };
+        var disciplineNotFull = new PartnerDigimon { SpeciesId = drimogemonId, Discipline = 99, Defense = 500 };
+        var wrongSpecies = new PartnerDigimon { SpeciesId = 7, Discipline = 100, Defense = 500 };
+
+        Assert.True(eligible.CanEvolveToMonochromon(drimogemonId));
+        Assert.False(defenseTooLow.CanEvolveToMonochromon(drimogemonId));
+        Assert.False(disciplineNotFull.CanEvolveToMonochromon(drimogemonId));
+        Assert.False(wrongSpecies.CanEvolveToMonochromon(drimogemonId));
+    }
+
+    [Fact]
     public void EvolveWithItem_ChangesSpeciesWithNoStatOrLifespanChange_WhenTargetIsInPossibleEvolutions()
     {
         var partner = new PartnerDigimon

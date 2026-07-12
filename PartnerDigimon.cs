@@ -10,6 +10,8 @@ public class PartnerDigimon : Digimon
     public const int CoelamonRequiredHoursInCurrentStage = 200;
     public const int NinjamonChancePercent = 30;
     public const int NinjamonRequiredBattlesFought = 50;
+    public const int MonochromonChancePercent = 30;
+    public const int MonochromonRequiredDefense = 500;
 
     public ActiveTimeEnum ActiveTime { get; set; }
     public string Nickname { get; set; }
@@ -143,6 +145,15 @@ public class PartnerDigimon : Digimon
         return SpeciesId == vegimonSpeciesId
             && Discipline == 100
             && BattlesFought > NinjamonRequiredBattlesFought;
+    }
+
+    // Drimogemon specifically, sleeps with Discipline 100 and Defense of
+    // at least 500. Sleep event and the 30% roll stay external.
+    public bool CanEvolveToMonochromon(int drimogemonSpeciesId)
+    {
+        return SpeciesId == drimogemonSpeciesId
+            && Discipline == 100
+            && Defense >= MonochromonRequiredDefense;
     }
 
     // Item-triggered evolution to a specific target. Still restricted to
