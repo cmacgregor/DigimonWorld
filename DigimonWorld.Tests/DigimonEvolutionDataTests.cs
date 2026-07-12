@@ -109,7 +109,7 @@ public class DigimonEvolutionDataTests
     }
 
     [Fact]
-    public void EvolveWithItem_ChangesSpeciesWithNoStatOrLifespanChange()
+    public void EvolveWithItem_ChangesSpeciesWithNoStatOrLifespanChange_WhenTargetIsInPossibleEvolutions()
     {
         var partner = new PartnerDigimon
         {
@@ -117,17 +117,31 @@ public class DigimonEvolutionDataTests
             Defense = 100,
             Lifespan = 200,
         };
+        partner.PossibleEvolutions.Add(new EvolutionRequirement { TargetDigimonId = 4 });
 
-        partner.EvolveWithItem(new DigimonEvolutionData
+        var succeeded = partner.EvolveWithItem(new DigimonEvolutionData
         {
             SpeciesId = 4,
             ReferenceAttack = 999,
             ReferenceDefense = 999,
         });
 
+        Assert.True(succeeded);
         Assert.Equal(4, partner.SpeciesId);
         Assert.Equal(100, partner.Attack);
         Assert.Equal(100, partner.Defense);
         Assert.Equal(200, partner.Lifespan);
+    }
+
+    [Fact]
+    public void EvolveWithItem_FailsWhenTargetIsNotInPossibleEvolutions()
+    {
+        var partner = new PartnerDigimon { SpeciesId = 1 };
+        partner.PossibleEvolutions.Add(new EvolutionRequirement { TargetDigimonId = 4 });
+
+        var succeeded = partner.EvolveWithItem(new DigimonEvolutionData { SpeciesId = 999 });
+
+        Assert.False(succeeded);
+        Assert.Equal(1, partner.SpeciesId); // unchanged
     }
 }

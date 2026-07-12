@@ -34,3 +34,13 @@ public enum StatusEffectEnum
     Poison,
     Stun,
 }
+
+public enum DigimonLevelEnum
+{
+    None,
+    Baby,
+    InTraining,
+    Rookie,
+    Champion,
+    Ultimate,
+}

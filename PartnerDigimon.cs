@@ -72,11 +72,28 @@ public class PartnerDigimon : Digimon
         ApplySpeciesChange(numemonData);
     }
 
-    // Item-triggered evolution to a specific target. The only evolution
-    // path with no stat gain and no lifespan gain - just the species change.
-    public void EvolveWithItem(DigimonEvolutionData targetSpeciesData)
+    // Item-triggered evolution to a specific target. Still restricted to
+    // this Mon's own PossibleEvolutions subset - an item can't send it
+    // anywhere outside that. The only path with no stat or lifespan gain.
+    public bool EvolveWithItem(DigimonEvolutionData targetSpeciesData)
     {
+        var isValidTarget = false;
+        foreach (var requirement in PossibleEvolutions)
+        {
+            if (requirement.TargetDigimonId == targetSpeciesData.SpeciesId)
+            {
+                isValidTarget = true;
+                break;
+            }
+        }
+
+        if (!isValidTarget)
+        {
+            return false;
+        }
+
         ApplySpeciesChange(targetSpeciesData);
+        return true;
     }
 
     private void ApplyStatPenaltyPercent(int percentLost)
@@ -94,6 +111,7 @@ public class PartnerDigimon : Digimon
     private void ApplySpeciesChange(DigimonEvolutionData newSpeciesData)
     {
         SpeciesId = newSpeciesData.SpeciesId;
+        Level = newSpeciesData.Level;
         HoursInCurrentStage = 0;
 
         PossibleEvolutions.Clear();
