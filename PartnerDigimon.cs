@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 public class PartnerDigimon : Digimon
@@ -13,6 +14,15 @@ public class PartnerDigimon : Digimon
     public const int HungerNeglectCareMistakesWhileTraining = 2;
     public const int HungerGaugeResetValueAfterNeglect = 100; // placeholder
 
+    // Energy is separate from HungerGauge - it's a second countdown that
+    // only starts draining once Hungry, and once it bottoms out, starvation
+    // weight loss kicks in. Task/battle/training-driven drain isn't modeled
+    // yet, same as the stat-gain formulas those would feed.
+    public const int EnergyGaugeMax = 240; // placeholder
+    public const int StarvationWeightLossIntervalMinutes = 10;
+    public const int StarvationWeightLossGrams = 1;
+    public const int SleepStarvationWeightLossGramsPerHour = 1;
+
     public ActiveTimeEnum ActiveTime { get; set; }
     public string Nickname { get; set; }
     public int Happiness { get; set; }
@@ -22,6 +32,11 @@ public class PartnerDigimon : Digimon
     public int Age { get; set; }
     public int Weight { get; set; }
     public int HungerGauge { get; set; }
+    public int Energy { get; set; }
+    // Accumulates minutes spent starving (Hungry with Energy depleted)
+    // between StarvationWeightLossIntervalMinutes ticks, so weight loss
+    // is correct regardless of how the caller chunks up AdvanceTime calls.
+    public int StarvationMinuteAccumulator { get; set; }
     // Set once the first time HungerGauge crosses the neglect threshold,
     // so the care mistake fires once per hungry episode, not every tick.
     // Feeding (not built yet) is expected to reset this back to false
@@ -61,13 +76,17 @@ public class PartnerDigimon : Digimon
 
     // Called by the world clock as it advances, in minutes. isTraining
     // doubles the care-mistake penalty below, per the rule that neglecting
-    // a hungry Digimon while it's training is worse. HoursInCurrentStage
+    // a hungry Digimon while it's training is worse. isSleeping represents
+    // a full sleep session (the caller passes its whole duration, e.g.
+    // ~9h, in one call): it freezes the neglect care-mistake timer and
+    // switches starvation weight loss to the flat per-hour sleep rate,
+    // since Energy can't replenish without eating. HoursInCurrentStage
     // and SleepGauge only tick once full 60-minute chunks accumulate, so
     // their existing whole-hour semantics (and the hour-based evolution
     // thresholds in EvolutionRequirement/SpecialEvolutions) stay unchanged.
     // Sleepy/NeedsToPotty aren't flipped here; those threshold decisions
     // stay external, same as PottyGauge's "full" condition already does.
-    public void AdvanceTime(int minutes, bool isTraining = false)
+    public void AdvanceTime(int minutes, bool isTraining = false, bool isSleeping = false)
     {
         MinuteOfHour += minutes;
         var wholeHours = MinuteOfHour / MinutesPerHour;
@@ -79,6 +98,21 @@ public class PartnerDigimon : Digimon
         var previousHungerGauge = HungerGauge;
         HungerGauge -= minutes;
 
+        if (Hungry)
+        {
+            Energy = Math.Max(0, Energy - minutes);
+        }
+
+        if (isSleeping)
+        {
+            if (Hungry)
+            {
+                Weight -= wholeHours * SleepStarvationWeightLossGramsPerHour;
+            }
+
+            return;
+        }
+
         var neglectThreshold = -HungerNeglectCareMistakeMinutes;
         if (!HungerCareMistakeApplied && previousHungerGauge > neglectThreshold && HungerGauge <= neglectThreshold)
         {
@@ -87,7 +121,17 @@ public class PartnerDigimon : Digimon
             HungerGauge = HungerGaugeResetValueAfterNeglect;
 
             // TODO: Neglect should also decrease Happiness - amount TBD.
-            // TODO: Neglect should also decrease Weight - amount TBD.
+        }
+
+        if (Energy <= 0 && Hungry)
+        {
+            StarvationMinuteAccumulator += minutes;
+            Weight -= (StarvationMinuteAccumulator / StarvationWeightLossIntervalMinutes) * StarvationWeightLossGrams;
+            StarvationMinuteAccumulator %= StarvationWeightLossIntervalMinutes;
+        }
+        else
+        {
+            StarvationMinuteAccumulator = 0;
         }
     }
 

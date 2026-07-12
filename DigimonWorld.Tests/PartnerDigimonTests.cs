@@ -185,4 +185,106 @@ public class PartnerDigimonTests
         Assert.False(partner.HungerCareMistakeApplied);
         Assert.Equal(0, partner.CareMistakes);
     }
+
+    [Fact]
+    public void AdvanceTime_DoesNotDrainEnergy_WhileNotHungry()
+    {
+        var partner = new PartnerDigimon { HungerGauge = 100, Energy = 50 };
+
+        partner.AdvanceTime(30);
+
+        Assert.Equal(50, partner.Energy);
+    }
+
+    [Fact]
+    public void AdvanceTime_DrainsEnergyByMinutes_WhileHungry_ClampedAtZero()
+    {
+        var partner = new PartnerDigimon { HungerGauge = 0, Energy = 10 };
+
+        partner.AdvanceTime(15);
+
+        Assert.Equal(0, partner.Energy);
+    }
+
+    [Fact]
+    public void AdvanceTime_LosesWeight_OncePerTenStarvingMinutes_AccumulatingAcrossCalls()
+    {
+        var partner = new PartnerDigimon { HungerGauge = 0, Energy = 0, Weight = 500 };
+
+        partner.AdvanceTime(7);
+        Assert.Equal(500, partner.Weight);
+
+        partner.AdvanceTime(5); // 12 accumulated minutes -> 1 gram lost, 2 minutes carried over
+        Assert.Equal(499, partner.Weight);
+        Assert.Equal(2, partner.StarvationMinuteAccumulator);
+    }
+
+    [Fact]
+    public void AdvanceTime_DoesNotLoseWeight_WhileEnergyRemains()
+    {
+        var partner = new PartnerDigimon { HungerGauge = 0, Energy = 100, Weight = 500 };
+
+        partner.AdvanceTime(30);
+
+        Assert.Equal(500, partner.Weight);
+    }
+
+    [Fact]
+    public void AdvanceTime_ResetsStarvationAccumulator_OnceNoLongerStarving()
+    {
+        var partner = new PartnerDigimon
+        {
+            HungerGauge = 100,
+            Energy = 0,
+            StarvationMinuteAccumulator = 5,
+        };
+
+        partner.AdvanceTime(10); // not hungry, so no longer starving
+
+        Assert.Equal(0, partner.StarvationMinuteAccumulator);
+    }
+
+    [Fact]
+    public void AdvanceTime_WhileSleeping_LosesWeightByTheHour_WhenHungry()
+    {
+        var partner = new PartnerDigimon { HungerGauge = 0, Weight = 500 };
+
+        partner.AdvanceTime(9 * PartnerDigimon.MinutesPerHour, isSleeping: true);
+
+        Assert.Equal(491, partner.Weight); // 500 - 9g for 9 hours asleep while hungry
+    }
+
+    [Fact]
+    public void AdvanceTime_WhileSleeping_DoesNotLoseWeight_WhenNotHungry()
+    {
+        var partner = new PartnerDigimon { HungerGauge = 1000, Weight = 500 };
+
+        partner.AdvanceTime(9 * PartnerDigimon.MinutesPerHour, isSleeping: true);
+
+        Assert.Equal(500, partner.Weight);
+    }
+
+    [Fact]
+    public void AdvanceTime_WhileSleeping_FreezesTheNeglectCareMistakeTimer()
+    {
+        var partner = new PartnerDigimon { HungerGauge = 1 };
+
+        partner.AdvanceTime(91, isSleeping: true);
+
+        Assert.False(partner.HungerCareMistakeApplied);
+        Assert.Equal(0, partner.CareMistakes);
+        Assert.Equal(-90, partner.HungerGauge); // not reset, since neglect never fires
+    }
+
+    [Fact]
+    public void AdvanceTime_WhileSleeping_StillAdvancesStageTimerAndSleepGauge()
+    {
+        var partner = new PartnerDigimon { HoursInCurrentStage = 0, SleepGauge = 0 };
+
+        partner.AdvanceTime(90, isSleeping: true); // 1h30m
+
+        Assert.Equal(1, partner.HoursInCurrentStage);
+        Assert.Equal(1, partner.SleepGauge);
+        Assert.Equal(30, partner.MinuteOfHour);
+    }
 }
