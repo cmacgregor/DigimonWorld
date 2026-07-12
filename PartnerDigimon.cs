@@ -4,6 +4,7 @@ public class PartnerDigimon : Digimon
 {
     public const int LifespanGainOnEvolve = 96;
 
+    public ActiveTimeEnum ActiveTime { get; set; }
     public string Nickname { get; set; }
     public int Happiness { get; set; }
     public int Discipline { get; set; }

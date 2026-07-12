@@ -3,7 +3,6 @@ using System.Collections.Generic;
 public interface IBattleStats
 {
     public DigimonTypeEnum Type { get; set; }
-    public ActiveTimeEnum ActiveTime { get; set; }
     public SpecialtiesEnum Specialty1 { get; set; }
     public SpecialtiesEnum Specialty2 { get; set; }
     public int CurrentHP { get; set; }
