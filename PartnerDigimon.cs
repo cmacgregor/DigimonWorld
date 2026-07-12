@@ -6,6 +6,8 @@ public class PartnerDigimon : Digimon
     public const int BakemonChancePercent = 10;
     public const int DevimonChancePercent = 50;
     public const int AirdramonChancePercent = 30;
+    public const int CoelamonChancePercent = 30;
+    public const int CoelamonRequiredHoursInCurrentStage = 200;
 
     public ActiveTimeEnum ActiveTime { get; set; }
     public string Nickname { get; set; }
@@ -119,6 +121,15 @@ public class PartnerDigimon : Digimon
         return (SpeciesId == seadramonSpeciesId || SpeciesId == birdramonSpeciesId)
             && Discipline == 100
             && Happiness == 100;
+    }
+
+    // Whamon or Shellmon, scolded or praised while the evolution counter
+    // is at exactly 200h. Scold/praise event and the 30% roll stay
+    // external.
+    public bool CanEvolveToCoelamon(int whamonSpeciesId, int shellmonSpeciesId)
+    {
+        return (SpeciesId == whamonSpeciesId || SpeciesId == shellmonSpeciesId)
+            && HoursInCurrentStage == CoelamonRequiredHoursInCurrentStage;
     }
 
     // Item-triggered evolution to a specific target. Still restricted to

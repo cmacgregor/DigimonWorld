@@ -233,6 +233,23 @@ public class DigimonEvolutionDataTests
     }
 
     [Fact]
+    public void CanEvolveToCoelamon_AllowsEitherWhamonOrShellmonAtExactly200Hours()
+    {
+        const int whamonId = 20;
+        const int shellmonId = 21;
+
+        var whamonEligible = new PartnerDigimon { SpeciesId = whamonId, HoursInCurrentStage = 200 };
+        var shellmonEligible = new PartnerDigimon { SpeciesId = shellmonId, HoursInCurrentStage = 200 };
+        var wrongSpecies = new PartnerDigimon { SpeciesId = 7, HoursInCurrentStage = 200 };
+        var wrongHour = new PartnerDigimon { SpeciesId = whamonId, HoursInCurrentStage = 201 };
+
+        Assert.True(whamonEligible.CanEvolveToCoelamon(whamonId, shellmonId));
+        Assert.True(shellmonEligible.CanEvolveToCoelamon(whamonId, shellmonId));
+        Assert.False(wrongSpecies.CanEvolveToCoelamon(whamonId, shellmonId));
+        Assert.False(wrongHour.CanEvolveToCoelamon(whamonId, shellmonId));
+    }
+
+    [Fact]
     public void EvolveWithItem_ChangesSpeciesWithNoStatOrLifespanChange_WhenTargetIsInPossibleEvolutions()
     {
         var partner = new PartnerDigimon
