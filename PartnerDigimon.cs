@@ -11,6 +11,7 @@ public class PartnerDigimon : Digimon
     public const int HungerGaugeMax = 480; // placeholder: ~8h before Hungry
     public const int HungerNeglectCareMistakeMinutes = 90; // 1.5h past Hungry
     public const int HungerNeglectCareMistakesWhileTraining = 2;
+    public const int HungerGaugeResetValueAfterNeglect = 100; // placeholder
 
     public ActiveTimeEnum ActiveTime { get; set; }
     public string Nickname { get; set; }
@@ -83,6 +84,10 @@ public class PartnerDigimon : Digimon
         {
             CareMistakes += isTraining ? HungerNeglectCareMistakesWhileTraining : 1;
             HungerCareMistakeApplied = true;
+            HungerGauge = HungerGaugeResetValueAfterNeglect;
+
+            // TODO: Neglect should also decrease Happiness - amount TBD.
+            // TODO: Neglect should also decrease Weight - amount TBD.
         }
     }
 

@@ -143,6 +143,16 @@ public class PartnerDigimonTests
     }
 
     [Fact]
+    public void AdvanceTime_ResetsHungerGauge_WhenNeglectCareMistakeFires()
+    {
+        var partner = new PartnerDigimon { HungerGauge = 1 };
+
+        partner.AdvanceTime(91);
+
+        Assert.Equal(PartnerDigimon.HungerGaugeResetValueAfterNeglect, partner.HungerGauge);
+    }
+
+    [Fact]
     public void AdvanceTime_AppliesTwoCareMistakes_WhenHungerNeglectCrossesWhileTraining()
     {
         var partner = new PartnerDigimon { HungerGauge = 1 };
