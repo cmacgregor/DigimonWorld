@@ -16,6 +16,7 @@ public class PartnerDigimon : Digimon
     public const int VademonPraiseOrScoldRequiredHoursInCurrentStage = 240;
     public const int VademonTimeoutRequiredHoursInCurrentStage = 360;
     public const int PhoenixmonChancePercent = 10;
+    public const int SkullgreymonChancePercent = 10;
 
     public ActiveTimeEnum ActiveTime { get; set; }
     public string Nickname { get; set; }
@@ -183,6 +184,13 @@ public class PartnerDigimon : Digimon
     public bool CanEvolveToPhoenixmon(int kokatorimonSpeciesId)
     {
         return SpeciesId == kokatorimonSpeciesId;
+    }
+
+    // MetalGreymon or Megadramon, when it loses a life. Life-loss event
+    // and the 10% roll stay external.
+    public bool CanEvolveToSkullgreymon(int metalGreymonSpeciesId, int megadramonSpeciesId)
+    {
+        return SpeciesId == metalGreymonSpeciesId || SpeciesId == megadramonSpeciesId;
     }
 
     // Item-triggered evolution to a specific target. Still restricted to

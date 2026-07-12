@@ -331,6 +331,21 @@ public class DigimonEvolutionDataTests
     }
 
     [Fact]
+    public void CanEvolveToSkullgreymon_AllowsEitherMetalGreymonOrMegadramon()
+    {
+        const int metalGreymonId = 60;
+        const int megadramonId = 61;
+
+        var metalGreymonEligible = new PartnerDigimon { SpeciesId = metalGreymonId };
+        var megadramonEligible = new PartnerDigimon { SpeciesId = megadramonId };
+        var wrongSpecies = new PartnerDigimon { SpeciesId = 7 };
+
+        Assert.True(metalGreymonEligible.CanEvolveToSkullgreymon(metalGreymonId, megadramonId));
+        Assert.True(megadramonEligible.CanEvolveToSkullgreymon(metalGreymonId, megadramonId));
+        Assert.False(wrongSpecies.CanEvolveToSkullgreymon(metalGreymonId, megadramonId));
+    }
+
+    [Fact]
     public void EvolveWithItem_ChangesSpeciesWithNoStatOrLifespanChange_WhenTargetIsInPossibleEvolutions()
     {
         var partner = new PartnerDigimon
