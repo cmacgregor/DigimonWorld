@@ -121,9 +121,9 @@ public class PartnerDigimonTests
     [Fact]
     public void AdvanceTime_AddsHungerNeglectCareMistakes_ToThePartnersTotal()
     {
-        var partner = new PartnerDigimon { Hunger = { Gauge = 1 } };
+        var partner = new PartnerDigimon { Hunger = { Gauge = 1 }, IsTraining = true };
 
-        partner.AdvanceTime(91, isTraining: true); // crosses the neglect threshold while training
+        partner.AdvanceTime(91); // crosses the neglect threshold while training
 
         Assert.Equal(2, partner.CareMistakes);
     }

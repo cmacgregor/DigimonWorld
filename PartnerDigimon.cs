@@ -23,6 +23,7 @@ public class PartnerDigimon : Digimon
     public int MinuteOfHour { get; set; }
     public int MinHoursInCurrentStage { get; set; }
     public LocationEnum CurrentLocation { get; set; }
+    public bool IsTraining { get; set; }
 
     public HungerSystem Hunger { get; } = new();
     public EnergySystem Energy { get; } = new();
@@ -32,18 +33,20 @@ public class PartnerDigimon : Digimon
 
     public List<EvolutionRequirement> PossibleEvolutions { get; } = new();
 
-    // Called by the world clock as it advances, in minutes. isTraining
+    // Called by the world clock as it advances, in minutes. IsTraining
     // doubles Hunger's neglect care-mistake penalty, per the rule that
-    // neglecting a hungry Digimon while it's training is worse. isSleeping
-    // represents a full sleep session (the caller passes its whole
-    // duration, e.g. ~9h, in one call): it freezes Hunger's neglect timer
-    // and switches Energy's starvation weight loss to the flat per-hour
-    // sleep rate, since Energy can't replenish without eating.
+    // neglecting a hungry Digimon while it's training is worse - it's
+    // state on the partner itself (set by whatever starts/stops a
+    // training session), not something the world clock knows about.
+    // isSleeping represents a full sleep session (the caller passes its
+    // whole duration, e.g. ~9h, in one call): it freezes Hunger's neglect
+    // timer and switches Energy's starvation weight loss to the flat
+    // per-hour sleep rate, since Energy can't replenish without eating.
     // HoursInCurrentStage only ticks once full 60-minute chunks
     // accumulate, so its existing whole-hour semantics (and the
     // hour-based evolution thresholds in EvolutionRequirement/
     // SpecialEvolutions) stay unchanged.
-    public void AdvanceTime(int minutes, bool isTraining = false, bool isSleeping = false)
+    public void AdvanceTime(int minutes, bool isSleeping = false)
     {
         MinuteOfHour += minutes;
         var wholeHours = MinuteOfHour / MinutesPerHour;
@@ -52,7 +55,7 @@ public class PartnerDigimon : Digimon
         HoursInCurrentStage += wholeHours;
         Sleep.Advance(wholeHours);
 
-        CareMistakes += Hunger.Advance(minutes, isTraining, isSleeping);
+        CareMistakes += Hunger.Advance(minutes, IsTraining, isSleeping);
         Weight -= Energy.Advance(minutes, wholeHours, Hunger.Hungry, isSleeping);
     }
 

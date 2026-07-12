@@ -17,14 +17,14 @@ public class GameStateTests
     }
 
     [Fact]
-    public void AdvanceTime_PassesIsTrainingThroughToThePartner()
+    public void AdvanceTime_HonorsThePartnersOwnIsTrainingState()
     {
         var gameState = new GameState
         {
-            CurrentPartner = new PartnerDigimon { Hunger = { Gauge = 1 } },
+            CurrentPartner = new PartnerDigimon { Hunger = { Gauge = 1 }, IsTraining = true },
         };
 
-        gameState.AdvanceTime(91, isTraining: true);
+        gameState.AdvanceTime(91);
 
         Assert.Equal(2, gameState.CurrentPartner.CareMistakes);
     }

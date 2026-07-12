@@ -6,9 +6,9 @@ public class GameState
 
     // Advances the world clock and the active partner's time-driven care
     // gauges together, since they're driven by the same passage of time.
-    public void AdvanceTime(int minutes, bool isTraining = false, bool isSleeping = false)
+    public void AdvanceTime(int minutes, bool isSleeping = false)
     {
         CurrentTime.Advance(minutes);
-        CurrentPartner?.AdvanceTime(minutes, isTraining, isSleeping);
+        CurrentPartner?.AdvanceTime(minutes, isSleeping);
     }
 }
