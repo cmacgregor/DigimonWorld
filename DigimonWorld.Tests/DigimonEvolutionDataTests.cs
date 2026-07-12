@@ -216,6 +216,23 @@ public class DigimonEvolutionDataTests
     }
 
     [Fact]
+    public void CanEvolveToAirdramon_AllowsEitherSeadramonOrBirdramonAtFullDisciplineAndHappiness()
+    {
+        const int seadramonId = 10;
+        const int birdramonId = 11;
+
+        var seadramonEligible = new PartnerDigimon { SpeciesId = seadramonId, Discipline = 100, Happiness = 100 };
+        var birdramonEligible = new PartnerDigimon { SpeciesId = birdramonId, Discipline = 100, Happiness = 100 };
+        var wrongSpecies = new PartnerDigimon { SpeciesId = 7, Discipline = 100, Happiness = 100 };
+        var happinessTooLow = new PartnerDigimon { SpeciesId = seadramonId, Discipline = 100, Happiness = 99 };
+
+        Assert.True(seadramonEligible.CanEvolveToAirdramon(seadramonId, birdramonId));
+        Assert.True(birdramonEligible.CanEvolveToAirdramon(seadramonId, birdramonId));
+        Assert.False(wrongSpecies.CanEvolveToAirdramon(seadramonId, birdramonId));
+        Assert.False(happinessTooLow.CanEvolveToAirdramon(seadramonId, birdramonId));
+    }
+
+    [Fact]
     public void EvolveWithItem_ChangesSpeciesWithNoStatOrLifespanChange_WhenTargetIsInPossibleEvolutions()
     {
         var partner = new PartnerDigimon

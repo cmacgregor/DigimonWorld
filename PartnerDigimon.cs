@@ -5,6 +5,7 @@ public class PartnerDigimon : Digimon
     public const int LifespanGainOnEvolve = 96;
     public const int BakemonChancePercent = 10;
     public const int DevimonChancePercent = 50;
+    public const int AirdramonChancePercent = 30;
 
     public ActiveTimeEnum ActiveTime { get; set; }
     public string Nickname { get; set; }
@@ -107,6 +108,17 @@ public class PartnerDigimon : Digimon
     public bool CanEvolveToDevimon(int angemonSpeciesId)
     {
         return SpeciesId == angemonSpeciesId && Discipline <= 50;
+    }
+
+    // Seadramon or Birdramon, wakes up with Discipline and Happiness both
+    // at 100. Tiredness is deliberately not checked here yet - revisiting
+    // once that concept is settled. Wake-up event and the 30% roll stay
+    // external.
+    public bool CanEvolveToAirdramon(int seadramonSpeciesId, int birdramonSpeciesId)
+    {
+        return (SpeciesId == seadramonSpeciesId || SpeciesId == birdramonSpeciesId)
+            && Discipline == 100
+            && Happiness == 100;
     }
 
     // Item-triggered evolution to a specific target. Still restricted to
