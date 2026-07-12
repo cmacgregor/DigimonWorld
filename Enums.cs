@@ -44,3 +44,10 @@ public enum DigimonLevelEnum
     Champion,
     Ultimate,
 }
+
+public enum TirednessEnum
+{
+    Rested,
+    Tired,
+    Overworked,
+}

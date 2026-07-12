@@ -17,6 +17,9 @@ public class PartnerDigimon : Digimon
     public const int VademonTimeoutRequiredHoursInCurrentStage = 360;
     public const int PhoenixmonChancePercent = 10;
     public const int SkullgreymonChancePercent = 10;
+    public const int TirednessGaugeMax = 100;
+    public const int TiredThreshold = 80;
+    public const int OverworkedThreshold = 100;
 
     public ActiveTimeEnum ActiveTime { get; set; }
     public string Nickname { get; set; }
@@ -31,7 +34,7 @@ public class PartnerDigimon : Digimon
     public int PottyGauge { get; set; }
     public bool Injured { get; set; }
     public bool Sleepy { get; set; }
-    public bool Overworked { get; set; }
+    public int TirednessGauge { get; set; }
     public bool Sick { get; set; }
     public int CareMistakes { get; set; }
     public int Lifespan { get; set; }
@@ -41,6 +44,16 @@ public class PartnerDigimon : Digimon
     public int MinHoursInCurrentStage { get; set; }
 
     public List<EvolutionRequirement> PossibleEvolutions { get; } = new();
+
+    public TirednessEnum Tiredness
+    {
+        get
+        {
+            if (TirednessGauge >= OverworkedThreshold) return TirednessEnum.Overworked;
+            if (TirednessGauge >= TiredThreshold) return TirednessEnum.Tired;
+            return TirednessEnum.Rested;
+        }
+    }
 
     public EvolutionRequirement GetEligibleEvolution()
     {
@@ -123,14 +136,14 @@ public class PartnerDigimon : Digimon
     }
 
     // Seadramon or Birdramon, wakes up with Discipline and Happiness both
-    // at 100. Tiredness is deliberately not checked here yet - revisiting
-    // once that concept is settled. Wake-up event and the 30% roll stay
+    // at 100 and Rested tiredness. Wake-up event and the 30% roll stay
     // external.
     public bool CanEvolveToAirdramon(int seadramonSpeciesId, int birdramonSpeciesId)
     {
         return (SpeciesId == seadramonSpeciesId || SpeciesId == birdramonSpeciesId)
             && Discipline == 100
-            && Happiness == 100;
+            && Happiness == 100
+            && Tiredness == TirednessEnum.Rested;
     }
 
     // Whamon or Shellmon, scolded or praised while the evolution counter

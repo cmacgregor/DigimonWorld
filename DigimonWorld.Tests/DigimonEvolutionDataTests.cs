@@ -235,6 +235,37 @@ public class DigimonEvolutionDataTests
     }
 
     [Fact]
+    public void CanEvolveToAirdramon_FailsWhenNotRested()
+    {
+        const int seadramonId = 10;
+        const int birdramonId = 11;
+
+        var tired = new PartnerDigimon
+        {
+            SpeciesId = seadramonId,
+            Discipline = 100,
+            Happiness = 100,
+            TirednessGauge = 80,
+        };
+
+        Assert.False(tired.CanEvolveToAirdramon(seadramonId, birdramonId));
+    }
+
+    [Fact]
+    public void Tiredness_ReflectsGaugeThresholds()
+    {
+        var rested = new PartnerDigimon { TirednessGauge = 79 };
+        var tired = new PartnerDigimon { TirednessGauge = 80 };
+        var stillTired = new PartnerDigimon { TirednessGauge = 99 };
+        var overworked = new PartnerDigimon { TirednessGauge = 100 };
+
+        Assert.Equal(TirednessEnum.Rested, rested.Tiredness);
+        Assert.Equal(TirednessEnum.Tired, tired.Tiredness);
+        Assert.Equal(TirednessEnum.Tired, stillTired.Tiredness);
+        Assert.Equal(TirednessEnum.Overworked, overworked.Tiredness);
+    }
+
+    [Fact]
     public void CanEvolveToCoelamon_AllowsEitherWhamonOrShellmonAtExactly200Hours()
     {
         const int whamonId = 20;
