@@ -7,6 +7,15 @@ public class PartnerDigimon : Digimon
     public const int TiredThreshold = 80;
     public const int OverworkedThreshold = 100;
 
+    // HungerGauge ticks in half-hours (not whole hours) so the 1.5h
+    // neglect window divides evenly, without switching every other timer
+    // in the codebase (HoursInCurrentStage, SleepGauge, etc.) to
+    // fractional hours just for this one rule.
+    public const int HungerTicksPerHour = 2;
+    public const int HungerGaugeMax = 16; // placeholder: ~8h before Hungry
+    public const int HungerNeglectCareMistakeTicks = 3; // 1.5h past Hungry
+    public const int HungerNeglectCareMistakesWhileTraining = 2;
+
     public ActiveTimeEnum ActiveTime { get; set; }
     public string Nickname { get; set; }
     public int Happiness { get; set; }
@@ -15,8 +24,12 @@ public class PartnerDigimon : Digimon
     public int Lives { get; set; }
     public int Age { get; set; }
     public int Weight { get; set; }
-    public bool Hungry { get; set; }
     public int HungerGauge { get; set; }
+    // Set once the first time HungerGauge crosses the neglect threshold,
+    // so the care mistake fires once per hungry episode, not every tick.
+    // Feeding (not built yet) is expected to reset this back to false
+    // along with HungerGauge.
+    public bool HungerCareMistakeApplied { get; set; }
     public bool NeedsToPotty { get; set; }
     public int PottyGauge { get; set; }
     public bool Injured { get; set; }
@@ -44,16 +57,30 @@ public class PartnerDigimon : Digimon
         }
     }
 
-    // Called by the world clock as it advances. Rate is a 1:1 placeholder
-    // (1 gauge point per hour) until real pacing is designed - adjust
-    // here once that's settled. Hungry/Sleepy/NeedsToPotty aren't flipped
-    // here; that threshold decision stays external, same as PottyGauge's
-    // "full" condition already does.
-    public void AdvanceTime(int hours)
+    // Unlike Tiredness/PottyGauge, HungerGauge counts down - it's a timer
+    // until hungry, not a meter that builds up to it.
+    public bool Hungry => HungerGauge <= 0;
+
+    // Called by the world clock as it advances. isTraining doubles the
+    // care-mistake penalty below, per the rule that neglecting a hungry
+    // Digimon while it's training is worse. SleepGauge's rate is still a
+    // 1:1 placeholder (1 point per hour) until real pacing is designed.
+    // Sleepy/NeedsToPotty aren't flipped here; those threshold decisions
+    // stay external, same as PottyGauge's "full" condition already does.
+    public void AdvanceTime(int hours, bool isTraining = false)
     {
         HoursInCurrentStage += hours;
-        HungerGauge += hours;
         SleepGauge += hours;
+
+        var previousHungerGauge = HungerGauge;
+        HungerGauge -= hours * HungerTicksPerHour;
+
+        var neglectThreshold = -HungerNeglectCareMistakeTicks;
+        if (!HungerCareMistakeApplied && previousHungerGauge > neglectThreshold && HungerGauge <= neglectThreshold)
+        {
+            CareMistakes += isTraining ? HungerNeglectCareMistakesWhileTraining : 1;
+            HungerCareMistakeApplied = true;
+        }
     }
 
     // Shared application point for training/battle/food stat gains -
