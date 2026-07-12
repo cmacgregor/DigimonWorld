@@ -85,20 +85,37 @@ public class PartnerDigimonTests
     }
 
     [Fact]
-    public void AdvanceTime_IncrementsStageTimerAndSleepGauge_CountsDownHungerGauge()
+    public void AdvanceTime_OnFullHours_IncrementsStageTimerAndSleepGauge_CountsDownHungerGaugeByMinutes()
     {
         var partner = new PartnerDigimon
         {
             HoursInCurrentStage = 10,
-            HungerGauge = 10,
+            HungerGauge = 200,
             SleepGauge = 2,
         };
 
-        partner.AdvanceTime(3);
+        partner.AdvanceTime(3 * PartnerDigimon.MinutesPerHour); // 3 hours
 
         Assert.Equal(13, partner.HoursInCurrentStage);
-        Assert.Equal(4, partner.HungerGauge); // 10 - (3 hours * 2 ticks/hour)
+        Assert.Equal(20, partner.HungerGauge); // 200 - 180 minutes
         Assert.Equal(5, partner.SleepGauge);
+    }
+
+    [Fact]
+    public void AdvanceTime_WithinTheSameHour_DoesNotYetIncrementStageTimerOrSleepGauge()
+    {
+        var partner = new PartnerDigimon
+        {
+            HoursInCurrentStage = 10,
+            SleepGauge = 2,
+            MinuteOfHour = 10,
+        };
+
+        partner.AdvanceTime(30);
+
+        Assert.Equal(10, partner.HoursInCurrentStage);
+        Assert.Equal(2, partner.SleepGauge);
+        Assert.Equal(40, partner.MinuteOfHour);
     }
 
     [Fact]
@@ -118,8 +135,8 @@ public class PartnerDigimonTests
     {
         var partner = new PartnerDigimon { HungerGauge = 1 };
 
-        // Crosses from HungerGauge=1 to -3 in one tick (2h = 4 ticks).
-        partner.AdvanceTime(2);
+        // Crosses from HungerGauge=1 to -90 in one tick (91 minutes).
+        partner.AdvanceTime(91);
 
         Assert.True(partner.HungerCareMistakeApplied);
         Assert.Equal(1, partner.CareMistakes);
@@ -130,7 +147,7 @@ public class PartnerDigimonTests
     {
         var partner = new PartnerDigimon { HungerGauge = 1 };
 
-        partner.AdvanceTime(2, isTraining: true);
+        partner.AdvanceTime(91, isTraining: true);
 
         Assert.True(partner.HungerCareMistakeApplied);
         Assert.Equal(2, partner.CareMistakes);
@@ -141,8 +158,8 @@ public class PartnerDigimonTests
     {
         var partner = new PartnerDigimon { HungerGauge = 1 };
 
-        partner.AdvanceTime(2); // crosses the threshold, applies 1 mistake
-        partner.AdvanceTime(5); // still neglected, well past the threshold
+        partner.AdvanceTime(91); // crosses the threshold, applies 1 mistake
+        partner.AdvanceTime(300); // still neglected, well past the threshold
 
         Assert.Equal(1, partner.CareMistakes);
     }
@@ -152,8 +169,8 @@ public class PartnerDigimonTests
     {
         var partner = new PartnerDigimon { HungerGauge = 1 };
 
-        // Hungry (gauge <= 0) but not yet 1.5h (3 ticks) past it.
-        partner.AdvanceTime(1);
+        // Hungry (gauge <= 0) but not yet 90 minutes past it.
+        partner.AdvanceTime(50);
 
         Assert.False(partner.HungerCareMistakeApplied);
         Assert.Equal(0, partner.CareMistakes);

@@ -6,14 +6,10 @@ public class PartnerDigimon : Digimon
     public const int TirednessGaugeMax = 100;
     public const int TiredThreshold = 80;
     public const int OverworkedThreshold = 100;
+    public const int MinutesPerHour = 60;
 
-    // HungerGauge ticks in half-hours (not whole hours) so the 1.5h
-    // neglect window divides evenly, without switching every other timer
-    // in the codebase (HoursInCurrentStage, SleepGauge, etc.) to
-    // fractional hours just for this one rule.
-    public const int HungerTicksPerHour = 2;
-    public const int HungerGaugeMax = 16; // placeholder: ~8h before Hungry
-    public const int HungerNeglectCareMistakeTicks = 3; // 1.5h past Hungry
+    public const int HungerGaugeMax = 480; // placeholder: ~8h before Hungry
+    public const int HungerNeglectCareMistakeMinutes = 90; // 1.5h past Hungry
     public const int HungerNeglectCareMistakesWhileTraining = 2;
 
     public ActiveTimeEnum ActiveTime { get; set; }
@@ -42,6 +38,7 @@ public class PartnerDigimon : Digimon
     public int BattlesFought { get; set; }
     public int BattlesWon { get; set; }
     public int HoursInCurrentStage { get; set; }
+    public int MinuteOfHour { get; set; }
     public int MinHoursInCurrentStage { get; set; }
     public LocationEnum CurrentLocation { get; set; }
 
@@ -61,21 +58,27 @@ public class PartnerDigimon : Digimon
     // until hungry, not a meter that builds up to it.
     public bool Hungry => HungerGauge <= 0;
 
-    // Called by the world clock as it advances. isTraining doubles the
-    // care-mistake penalty below, per the rule that neglecting a hungry
-    // Digimon while it's training is worse. SleepGauge's rate is still a
-    // 1:1 placeholder (1 point per hour) until real pacing is designed.
+    // Called by the world clock as it advances, in minutes. isTraining
+    // doubles the care-mistake penalty below, per the rule that neglecting
+    // a hungry Digimon while it's training is worse. HoursInCurrentStage
+    // and SleepGauge only tick once full 60-minute chunks accumulate, so
+    // their existing whole-hour semantics (and the hour-based evolution
+    // thresholds in EvolutionRequirement/SpecialEvolutions) stay unchanged.
     // Sleepy/NeedsToPotty aren't flipped here; those threshold decisions
     // stay external, same as PottyGauge's "full" condition already does.
-    public void AdvanceTime(int hours, bool isTraining = false)
+    public void AdvanceTime(int minutes, bool isTraining = false)
     {
-        HoursInCurrentStage += hours;
-        SleepGauge += hours;
+        MinuteOfHour += minutes;
+        var wholeHours = MinuteOfHour / MinutesPerHour;
+        MinuteOfHour %= MinutesPerHour;
+
+        HoursInCurrentStage += wholeHours;
+        SleepGauge += wholeHours;
 
         var previousHungerGauge = HungerGauge;
-        HungerGauge -= hours * HungerTicksPerHour;
+        HungerGauge -= minutes;
 
-        var neglectThreshold = -HungerNeglectCareMistakeTicks;
+        var neglectThreshold = -HungerNeglectCareMistakeMinutes;
         if (!HungerCareMistakeApplied && previousHungerGauge > neglectThreshold && HungerGauge <= neglectThreshold)
         {
             CareMistakes += isTraining ? HungerNeglectCareMistakesWhileTraining : 1;

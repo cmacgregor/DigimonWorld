@@ -3,6 +3,7 @@
 // PartnerDigimon.ActiveTime already does).
 public class WorldTime
 {
+    public const int MinutesPerHour = 60;
     public const int HoursPerDay = 24;
 
     // Hour bands are an even split of the day - adjust if the real
@@ -13,6 +14,7 @@ public class WorldTime
 
     public int Day { get; set; }
     public int HourOfDay { get; set; }
+    public int MinuteOfHour { get; set; }
 
     public ActiveTimeEnum ActiveTime
     {
@@ -25,9 +27,11 @@ public class WorldTime
         }
     }
 
-    public void Advance(int hours)
+    public void Advance(int minutes)
     {
-        HourOfDay += hours;
+        MinuteOfHour += minutes;
+        HourOfDay += MinuteOfHour / MinutesPerHour;
+        MinuteOfHour %= MinutesPerHour;
         Day += HourOfDay / HoursPerDay;
         HourOfDay %= HoursPerDay;
     }

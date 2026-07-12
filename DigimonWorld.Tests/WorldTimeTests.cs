@@ -19,14 +19,27 @@ public class WorldTimeTests
     }
 
     [Fact]
-    public void Advance_WithinTheSameDay_OnlyMovesHourOfDay()
+    public void Advance_WithinTheSameHour_OnlyMovesMinuteOfHour()
     {
-        var time = new WorldTime { Day = 1, HourOfDay = 10 };
+        var time = new WorldTime { Day = 1, HourOfDay = 10, MinuteOfHour = 10 };
 
         time.Advance(5);
 
         Assert.Equal(1, time.Day);
-        Assert.Equal(15, time.HourOfDay);
+        Assert.Equal(10, time.HourOfDay);
+        Assert.Equal(15, time.MinuteOfHour);
+    }
+
+    [Fact]
+    public void Advance_PastTheHour_RollsOverIntoHourOfDay()
+    {
+        var time = new WorldTime { Day = 1, HourOfDay = 10, MinuteOfHour = 55 };
+
+        time.Advance(10);
+
+        Assert.Equal(1, time.Day);
+        Assert.Equal(11, time.HourOfDay);
+        Assert.Equal(5, time.MinuteOfHour);
     }
 
     [Fact]
@@ -34,10 +47,11 @@ public class WorldTimeTests
     {
         var time = new WorldTime { Day = 1, HourOfDay = 22 };
 
-        time.Advance(5);
+        time.Advance(5 * WorldTime.MinutesPerHour);
 
         Assert.Equal(2, time.Day);
         Assert.Equal(3, time.HourOfDay);
+        Assert.Equal(0, time.MinuteOfHour);
     }
 
     [Fact]
@@ -45,9 +59,10 @@ public class WorldTimeTests
     {
         var time = new WorldTime { Day = 1, HourOfDay = 0 };
 
-        time.Advance(50); // 2 full days (48h) + 2h
+        time.Advance(50 * WorldTime.MinutesPerHour); // 2 full days (48h) + 2h
 
         Assert.Equal(3, time.Day);
         Assert.Equal(2, time.HourOfDay);
+        Assert.Equal(0, time.MinuteOfHour);
     }
 }
