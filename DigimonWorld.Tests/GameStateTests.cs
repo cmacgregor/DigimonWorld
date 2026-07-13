@@ -54,4 +54,14 @@ public class GameStateTests
         Assert.Equal(9, gameState.CurrentPartner.HoursInCurrentStage); // fixed Rookie+ bump, not the real 11h
         Assert.Equal(0, gameState.CurrentPartner.CareMistakes); // neglect timer frozen while asleep
     }
+
+    [Fact]
+    public void Inventory_IsAPlayerLevelResource_SharedAlongsideBits()
+    {
+        var gameState = new GameState();
+
+        gameState.Inventory.AddItem(itemId: 1, quantity: 3);
+
+        Assert.Equal(3, gameState.Inventory.GetQuantity(1));
+    }
 }

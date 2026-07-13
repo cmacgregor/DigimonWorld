@@ -60,3 +60,12 @@ public enum LocationEnum
     None,
     PlaceholderArea,
 }
+
+public enum ItemCategoryEnum
+{
+    None,
+    Food,
+    Medicine,
+    Evolution,
+    KeyItem,
+}
