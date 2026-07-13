@@ -18,7 +18,7 @@ public class StatGainsTests
         partner.ApplyStatGains(new StatGains { Attack = 5, MaxHP = 20 });
 
         Assert.Equal(15, partner.Attack);
-        Assert.Equal(20, partner.MaxHP);
+        Assert.Equal(30, partner.MaxHP); // 10 initial + 20 gain
         // Untouched fields default to 0 - everything else is unaffected.
         Assert.Equal(10, partner.Defense);
         Assert.Equal(10, partner.Speed);
