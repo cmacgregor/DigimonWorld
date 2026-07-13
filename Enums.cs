@@ -1,3 +1,4 @@
+using System;
 
 public enum DigimonTypeEnum {
     None,
@@ -61,11 +62,16 @@ public enum LocationEnum
     PlaceholderArea,
 }
 
-public enum ItemCategoryEnum
+// Which context(s) an item can be used in - a flag set rather than a
+// single exclusive category, since items overlap (e.g. something edible
+// that's also usable in battle). KeyItem covers items that aren't
+// consumed through Feed or Battle at all (story/quest triggers).
+[Flags]
+public enum ItemUsageEnum
 {
-    None,
-    Food,
-    Medicine,
-    Evolution,
-    KeyItem,
+    None = 0,
+    Feed = 1,
+    Battle = 2,
+    Evolution = 4,
+    KeyItem = 8,
 }
