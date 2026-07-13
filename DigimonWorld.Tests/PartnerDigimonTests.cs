@@ -83,4 +83,112 @@ public class PartnerDigimonTests
 
         Assert.Null(partner.GetEligibleEvolution());
     }
+
+    [Fact]
+    public void AdvanceTime_OnFullHours_IncrementsStageTimerAndSleepGauge_CountsDownHungerGaugeByMinutes()
+    {
+        var partner = new PartnerDigimon
+        {
+            HoursInCurrentStage = 10,
+            Hunger = { Gauge = 200 },
+            Sleep = { Gauge = 2 },
+        };
+
+        partner.AdvanceTime(3 * WorldTime.MinutesPerHour); // 3 hours
+
+        Assert.Equal(13, partner.HoursInCurrentStage);
+        Assert.Equal(20, partner.Hunger.Gauge); // 200 - 180 minutes
+        Assert.Equal(5, partner.Sleep.Gauge);
+    }
+
+    [Fact]
+    public void AdvanceTime_WithinTheSameHour_DoesNotYetIncrementStageTimerOrSleepGauge()
+    {
+        var partner = new PartnerDigimon
+        {
+            HoursInCurrentStage = 10,
+            Sleep = { Gauge = 2 },
+            MinuteOfHour = 10,
+        };
+
+        partner.AdvanceTime(30);
+
+        Assert.Equal(10, partner.HoursInCurrentStage);
+        Assert.Equal(2, partner.Sleep.Gauge);
+        Assert.Equal(40, partner.MinuteOfHour);
+    }
+
+    [Fact]
+    public void AdvanceTime_AddsHungerNeglectCareMistakes_ToThePartnersTotal()
+    {
+        var partner = new PartnerDigimon { Hunger = { Gauge = 1 }, IsTraining = true };
+
+        partner.AdvanceTime(91); // crosses the neglect threshold while training
+
+        Assert.Equal(2, partner.CareMistakes);
+    }
+
+    [Fact]
+    public void AdvanceTime_SubtractsEnergyStarvationLoss_FromWeight()
+    {
+        var partner = new PartnerDigimon
+        {
+            Hunger = { Gauge = 0 },
+            Energy = { Gauge = 0 },
+            Weight = 500,
+        };
+
+        partner.AdvanceTime(10); // Energy already depleted and hungry -> 1 gram lost
+
+        Assert.Equal(499, partner.Weight);
+    }
+
+    [Fact]
+    public void AdvanceTimeAsleep_LosesWeightByTheHour_WhenHungry()
+    {
+        var partner = new PartnerDigimon { Hunger = { Gauge = 0 }, Weight = 500 };
+
+        partner.AdvanceTimeAsleep(9 * WorldTime.MinutesPerHour);
+
+        Assert.Equal(491, partner.Weight); // 500 - 9g for 9 hours asleep while hungry
+    }
+
+    [Fact]
+    public void AdvanceTimeAsleep_FreezesTheHungerNeglectCareMistakeTimer()
+    {
+        var partner = new PartnerDigimon { Hunger = { Gauge = 1 } };
+
+        partner.AdvanceTimeAsleep(91);
+
+        Assert.False(partner.Hunger.CareMistakeApplied);
+        Assert.Equal(0, partner.CareMistakes);
+        Assert.Equal(-90, partner.Hunger.Gauge); // not reset, since neglect never fires
+    }
+
+    [Fact]
+    public void AdvanceTimeAsleep_StillAdvancesSleepGaugeAndMinuteOfHour_ByTheRealElapsedTime()
+    {
+        var partner = new PartnerDigimon { Sleep = { Gauge = 0 } };
+
+        partner.AdvanceTimeAsleep(90); // 1h30m of real sleep
+
+        Assert.Equal(1, partner.Sleep.Gauge);
+        Assert.Equal(30, partner.MinuteOfHour);
+    }
+
+    [Theory]
+    [InlineData(DigimonLevelEnum.Baby, 1)]
+    [InlineData(DigimonLevelEnum.InTraining, 3)]
+    [InlineData(DigimonLevelEnum.Rookie, 9)]
+    [InlineData(DigimonLevelEnum.Champion, 9)]
+    [InlineData(DigimonLevelEnum.Ultimate, 9)]
+    public void AdvanceTimeAsleep_BumpsStageTimerByAFixedAmountBasedOnLevel_RegardlessOfRealSleepDuration(
+        DigimonLevelEnum level, int expectedBump)
+    {
+        var partner = new PartnerDigimon { Level = level, HoursInCurrentStage = 0 };
+
+        partner.AdvanceTimeAsleep(11 * WorldTime.MinutesPerHour); // real duration is irrelevant to the bump
+
+        Assert.Equal(expectedBump, partner.HoursInCurrentStage);
+    }
 }

@@ -3,9 +3,13 @@ using System.Collections.Generic;
 public class PartnerDigimon : Digimon
 {
     public const int LifespanGainOnEvolve = 96;
-    public const int TirednessGaugeMax = 100;
-    public const int TiredThreshold = 80;
-    public const int OverworkedThreshold = 100;
+
+    // Sleep bumps HoursInCurrentStage by a flat amount based on Level,
+    // regardless of how long the Digimon actually slept - it doesn't
+    // accumulate hour-by-hour like the awake tick does.
+    public const int SleepHoursBumpForBaby = 1;
+    public const int SleepHoursBumpForInTraining = 3;
+    public const int SleepHoursBumpForRookieAndAbove = 9;
 
     public ActiveTimeEnum ActiveTime { get; set; }
     public string Nickname { get; set; }
@@ -15,31 +19,87 @@ public class PartnerDigimon : Digimon
     public int Lives { get; set; }
     public int Age { get; set; }
     public int Weight { get; set; }
-    public bool Hungry { get; set; }
-    public bool NeedsToPotty { get; set; }
-    public int PottyGauge { get; set; }
     public bool Injured { get; set; }
-    public bool Sleepy { get; set; }
-    public int TirednessGauge { get; set; }
     public bool Sick { get; set; }
     public int CareMistakes { get; set; }
     public int Lifespan { get; set; }
     public int BattlesFought { get; set; }
     public int BattlesWon { get; set; }
     public int HoursInCurrentStage { get; set; }
+    public int MinuteOfHour { get; set; }
     public int MinHoursInCurrentStage { get; set; }
     public LocationEnum CurrentLocation { get; set; }
+    public bool IsTraining { get; set; }
+
+    public HungerSystem Hunger { get; } = new();
+    public EnergySystem Energy { get; } = new();
+    public TirednessSystem Tiredness { get; } = new();
+    public SleepSystem Sleep { get; } = new();
+    public PottySystem Potty { get; } = new();
 
     public List<EvolutionRequirement> PossibleEvolutions { get; } = new();
 
-    public TirednessEnum Tiredness
+    // Called by the world clock as it advances, in minutes. IsTraining
+    // doubles Hunger's neglect care-mistake penalty, per the rule that
+    // neglecting a hungry Digimon while it's training is worse - it's
+    // state on the partner itself (set by whatever starts/stops a
+    // training session), not something the world clock knows about.
+    public void AdvanceTime(int minutes)
     {
-        get
-        {
-            if (TirednessGauge >= OverworkedThreshold) return TirednessEnum.Overworked;
-            if (TirednessGauge >= TiredThreshold) return TirednessEnum.Tired;
-            return TirednessEnum.Rested;
-        }
+        Tick(minutes, isSleeping: false);
+    }
+
+    // Invoked by the player's sleep command (enabled once Sleep.Sleepy is
+    // true) rather than the regular world-clock tick - the caller passes
+    // the actual real duration slept (e.g. however long until the fixed
+    // wake-up hour), which still drives the world clock, SleepGauge, and
+    // Hunger/Energy/Weight math below. It freezes Hunger's neglect timer
+    // and switches Energy's starvation weight loss to the flat per-hour
+    // sleep rate, since Energy can't replenish without eating. But per
+    // the source game, HoursInCurrentStage does NOT get the real elapsed
+    // hours here - it only gets a flat Level-based bump (see Tick),
+    // regardless of how long the Digimon actually slept.
+    public void AdvanceTimeAsleep(int minutes)
+    {
+        Tick(minutes, isSleeping: true);
+    }
+
+    // HoursInCurrentStage only ticks once full 60-minute chunks
+    // accumulate, so its existing whole-hour semantics (and the
+    // hour-based evolution thresholds in EvolutionRequirement/
+    // SpecialEvolutions) stay unchanged - except while asleep, where it
+    // gets the flat SleepHoursBump instead of the real elapsed hours.
+    private void Tick(int minutes, bool isSleeping)
+    {
+        MinuteOfHour += minutes;
+        var wholeHours = MinuteOfHour / WorldTime.MinutesPerHour;
+        MinuteOfHour %= WorldTime.MinutesPerHour;
+
+        HoursInCurrentStage += isSleeping ? SleepHoursBump : wholeHours;
+        Sleep.Advance(wholeHours);
+
+        CareMistakes += Hunger.Advance(minutes, IsTraining, isSleeping);
+        Weight -= Energy.Advance(minutes, wholeHours, Hunger.Hungry, isSleeping);
+    }
+
+    private int SleepHoursBump => Level switch
+    {
+        DigimonLevelEnum.Baby => SleepHoursBumpForBaby,
+        DigimonLevelEnum.InTraining => SleepHoursBumpForInTraining,
+        _ => SleepHoursBumpForRookieAndAbove,
+    };
+
+    // Shared application point for training/battle/food stat gains -
+    // each source computes its own StatGains elsewhere and applies it
+    // here, regardless of which stats it actually touches.
+    public void ApplyStatGains(StatGains gains)
+    {
+        Attack += gains.Attack;
+        Defense += gains.Defense;
+        Speed += gains.Speed;
+        Brains += gains.Brains;
+        MaxHP += gains.MaxHP;
+        MaxMP += gains.MaxMP;
     }
 
     public EvolutionRequirement GetEligibleEvolution()

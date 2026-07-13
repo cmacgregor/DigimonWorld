@@ -153,14 +153,14 @@ public class SpecialEvolutionsTests
             SpeciesId = seadramonId,
             Discipline = 100,
             Happiness = 100,
-            TirednessGauge = 80,
+            Tiredness = { Gauge = 80 },
         };
         var restedButNotZero = new PartnerDigimon
         {
             SpeciesId = seadramonId,
             Discipline = 100,
             Happiness = 100,
-            TirednessGauge = 1,
+            Tiredness = { Gauge = 1 },
         };
 
         Assert.False(SpecialEvolutions.CanEvolveToAirdramon(tired, seadramonId, birdramonId));

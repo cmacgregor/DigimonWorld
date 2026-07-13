@@ -107,20 +107,6 @@ public class DigimonEvolutionDataTests
     }
 
     [Fact]
-    public void Tiredness_ReflectsGaugeThresholds()
-    {
-        var rested = new PartnerDigimon { TirednessGauge = 79 };
-        var tired = new PartnerDigimon { TirednessGauge = 80 };
-        var stillTired = new PartnerDigimon { TirednessGauge = 99 };
-        var overworked = new PartnerDigimon { TirednessGauge = 100 };
-
-        Assert.Equal(TirednessEnum.Rested, rested.Tiredness);
-        Assert.Equal(TirednessEnum.Tired, tired.Tiredness);
-        Assert.Equal(TirednessEnum.Tired, stillTired.Tiredness);
-        Assert.Equal(TirednessEnum.Overworked, overworked.Tiredness);
-    }
-
-    [Fact]
     public void EvolveWithItem_ChangesSpeciesWithNoStatOrLifespanChange_WhenTargetIsInPossibleEvolutions()
     {
         var partner = new PartnerDigimon

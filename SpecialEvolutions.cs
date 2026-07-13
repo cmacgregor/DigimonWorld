@@ -58,10 +58,11 @@ public static class SpecialEvolutions
         partner.ApplySpeciesChange(nanimonData, resetStageTimer: false);
     }
 
-    // Any In-Training, sleeps in a particular area. Real location/world
-    // state isn't designed yet - LocationEnum.PlaceholderArea stands in
-    // for "the area" until that exists. Sleep event and the 50% roll
-    // stay external.
+    // Any In-Training, sleeps in a particular area. Sleep event and the
+    // 50% roll stay external.
+    // TODO: Real location/world state isn't designed yet -
+    // LocationEnum.PlaceholderArea stands in for "the area" until that
+    // exists; replace this check with the real area once it does.
     public static bool CanEvolveToKunemon(PartnerDigimon partner)
     {
         return partner.Level == DigimonLevelEnum.InTraining && partner.CurrentLocation == LocationEnum.PlaceholderArea;
@@ -85,7 +86,7 @@ public static class SpecialEvolutions
     }
 
     // Seadramon or Birdramon, wakes up with Discipline and Happiness both
-    // at 100 and TirednessGauge at exactly 0 (not just Rested - the
+    // at 100 and Tiredness.Gauge at exactly 0 (not just Rested - the
     // whole range up to 79 counts as Rested, but this needs the literal
     // floor). Wake-up event and the 30% roll stay external.
     public static bool CanEvolveToAirdramon(PartnerDigimon partner, int seadramonSpeciesId, int birdramonSpeciesId)
@@ -93,7 +94,7 @@ public static class SpecialEvolutions
         return (partner.SpeciesId == seadramonSpeciesId || partner.SpeciesId == birdramonSpeciesId)
             && partner.Discipline == 100
             && partner.Happiness == 100
-            && partner.TirednessGauge == 0;
+            && partner.Tiredness.Gauge == 0;
     }
 
     // Whamon or Shellmon, scolded or praised while the evolution counter
