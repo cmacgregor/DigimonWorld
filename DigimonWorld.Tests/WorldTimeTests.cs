@@ -65,4 +65,28 @@ public class WorldTimeTests
         Assert.Equal(2, time.HourOfDay);
         Assert.Equal(0, time.MinuteOfHour);
     }
+
+    [Fact]
+    public void MinutesUntilWakeUp_BeforeWakeUpHour_ReturnsMinutesLaterTheSameDay()
+    {
+        var time = new WorldTime { HourOfDay = 3, MinuteOfHour = 0 };
+
+        Assert.Equal(4 * WorldTime.MinutesPerHour, time.MinutesUntilWakeUp()); // 3:00 -> 7:00
+    }
+
+    [Fact]
+    public void MinutesUntilWakeUp_AfterWakeUpHour_WrapsToTheNextDay()
+    {
+        var time = new WorldTime { HourOfDay = 22, MinuteOfHour = 30 };
+
+        Assert.Equal(8 * WorldTime.MinutesPerHour + 30, time.MinutesUntilWakeUp()); // 22:30 -> 7:00 next day
+    }
+
+    [Fact]
+    public void MinutesUntilWakeUp_ExactlyAtWakeUpHour_WrapsToTheNextDay()
+    {
+        var time = new WorldTime { HourOfDay = WorldTime.WakeUpHour, MinuteOfHour = 0 };
+
+        Assert.Equal(24 * WorldTime.MinutesPerHour, time.MinutesUntilWakeUp());
+    }
 }

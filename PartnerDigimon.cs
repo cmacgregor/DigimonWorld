@@ -4,6 +4,13 @@ public class PartnerDigimon : Digimon
 {
     public const int LifespanGainOnEvolve = 96;
 
+    // Sleep bumps HoursInCurrentStage by a flat amount based on Level,
+    // regardless of how long the Digimon actually slept - it doesn't
+    // accumulate hour-by-hour like the awake tick does.
+    public const int SleepHoursBumpForBaby = 1;
+    public const int SleepHoursBumpForInTraining = 3;
+    public const int SleepHoursBumpForRookieAndAbove = 9;
+
     public ActiveTimeEnum ActiveTime { get; set; }
     public string Nickname { get; set; }
     public int Happiness { get; set; }
@@ -44,10 +51,14 @@ public class PartnerDigimon : Digimon
 
     // Invoked by the player's sleep command (enabled once Sleep.Sleepy is
     // true) rather than the regular world-clock tick - the caller passes
-    // the whole sleep session's duration (e.g. ~9h) in one call. Freezes
-    // Hunger's neglect timer and switches Energy's starvation weight loss
-    // to the flat per-hour sleep rate, since Energy can't replenish
-    // without eating.
+    // the actual real duration slept (e.g. however long until the fixed
+    // wake-up hour), which still drives the world clock, SleepGauge, and
+    // Hunger/Energy/Weight math below. It freezes Hunger's neglect timer
+    // and switches Energy's starvation weight loss to the flat per-hour
+    // sleep rate, since Energy can't replenish without eating. But per
+    // the source game, HoursInCurrentStage does NOT get the real elapsed
+    // hours here - it only gets a flat Level-based bump (see Tick),
+    // regardless of how long the Digimon actually slept.
     public void AdvanceTimeAsleep(int minutes)
     {
         Tick(minutes, isSleeping: true);
@@ -56,19 +67,27 @@ public class PartnerDigimon : Digimon
     // HoursInCurrentStage only ticks once full 60-minute chunks
     // accumulate, so its existing whole-hour semantics (and the
     // hour-based evolution thresholds in EvolutionRequirement/
-    // SpecialEvolutions) stay unchanged.
+    // SpecialEvolutions) stay unchanged - except while asleep, where it
+    // gets the flat SleepHoursBump instead of the real elapsed hours.
     private void Tick(int minutes, bool isSleeping)
     {
         MinuteOfHour += minutes;
         var wholeHours = MinuteOfHour / WorldTime.MinutesPerHour;
         MinuteOfHour %= WorldTime.MinutesPerHour;
 
-        HoursInCurrentStage += wholeHours;
+        HoursInCurrentStage += isSleeping ? SleepHoursBump : wholeHours;
         Sleep.Advance(wholeHours);
 
         CareMistakes += Hunger.Advance(minutes, IsTraining, isSleeping);
         Weight -= Energy.Advance(minutes, wholeHours, Hunger.Hungry, isSleeping);
     }
+
+    private int SleepHoursBump => Level switch
+    {
+        DigimonLevelEnum.Baby => SleepHoursBumpForBaby,
+        DigimonLevelEnum.InTraining => SleepHoursBumpForInTraining,
+        _ => SleepHoursBumpForRookieAndAbove,
+    };
 
     // Shared application point for training/battle/food stat gains -
     // each source computes its own StatGains elsewhere and applies it

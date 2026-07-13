@@ -40,16 +40,18 @@ public class GameStateTests
     }
 
     [Fact]
-    public void Sleep_AdvancesWorldClockAndTellsThePartnerItsAsleep()
+    public void Sleep_AdvancesWorldClockToTheFixedWakeUpHour_ButBumpsThePartnersStageTimerByAFixedAmount()
     {
         var gameState = new GameState
         {
-            CurrentPartner = new PartnerDigimon { Hunger = { Gauge = 1 } },
+            CurrentTime = { HourOfDay = 20, MinuteOfHour = 0 }, // 20:00 -> 7:00 next day = 11 real hours
+            CurrentPartner = new PartnerDigimon { Level = DigimonLevelEnum.Rookie, Hunger = { Gauge = 1 } },
         };
 
-        gameState.Sleep(91); // would incur a neglect care mistake while awake
+        gameState.Sleep();
 
-        Assert.Equal(1, gameState.CurrentTime.HourOfDay);
-        Assert.Equal(0, gameState.CurrentPartner.CareMistakes);
+        Assert.Equal(WorldTime.WakeUpHour, gameState.CurrentTime.HourOfDay);
+        Assert.Equal(9, gameState.CurrentPartner.HoursInCurrentStage); // fixed Rookie+ bump, not the real 11h
+        Assert.Equal(0, gameState.CurrentPartner.CareMistakes); // neglect timer frozen while asleep
     }
 }

@@ -166,14 +166,29 @@ public class PartnerDigimonTests
     }
 
     [Fact]
-    public void AdvanceTimeAsleep_StillAdvancesStageTimerAndSleepGauge()
+    public void AdvanceTimeAsleep_StillAdvancesSleepGaugeAndMinuteOfHour_ByTheRealElapsedTime()
     {
-        var partner = new PartnerDigimon { HoursInCurrentStage = 0, Sleep = { Gauge = 0 } };
+        var partner = new PartnerDigimon { Sleep = { Gauge = 0 } };
 
-        partner.AdvanceTimeAsleep(90); // 1h30m
+        partner.AdvanceTimeAsleep(90); // 1h30m of real sleep
 
-        Assert.Equal(1, partner.HoursInCurrentStage);
         Assert.Equal(1, partner.Sleep.Gauge);
         Assert.Equal(30, partner.MinuteOfHour);
+    }
+
+    [Theory]
+    [InlineData(DigimonLevelEnum.Baby, 1)]
+    [InlineData(DigimonLevelEnum.InTraining, 3)]
+    [InlineData(DigimonLevelEnum.Rookie, 9)]
+    [InlineData(DigimonLevelEnum.Champion, 9)]
+    [InlineData(DigimonLevelEnum.Ultimate, 9)]
+    public void AdvanceTimeAsleep_BumpsStageTimerByAFixedAmountBasedOnLevel_RegardlessOfRealSleepDuration(
+        DigimonLevelEnum level, int expectedBump)
+    {
+        var partner = new PartnerDigimon { Level = level, HoursInCurrentStage = 0 };
+
+        partner.AdvanceTimeAsleep(11 * WorldTime.MinutesPerHour); // real duration is irrelevant to the bump
+
+        Assert.Equal(expectedBump, partner.HoursInCurrentStage);
     }
 }

@@ -13,10 +13,12 @@ public class GameState
     }
 
     // The player's sleep command, enabled once the partner is Sleepy.
-    // Advances the same world clock, but tells the partner it's asleep
-    // for the duration instead of ticking normally.
-    public void Sleep(int minutes)
+    // Digimon always wake up at the same fixed clock hour, so the sleep
+    // duration isn't up to the caller - it's however long remains until
+    // WorldTime.WakeUpHour from right now.
+    public void Sleep()
     {
+        var minutes = CurrentTime.MinutesUntilWakeUp();
         CurrentTime.Advance(minutes);
         CurrentPartner?.AdvanceTimeAsleep(minutes);
     }
